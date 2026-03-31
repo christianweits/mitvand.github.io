@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>VandApp</title>
+<style>
+  :root {
+    --navy: #0D2F4F;
+    --blue: #00A8E0;
+    --green: #1A8A00;
+    --light-green: #D2F4DE;
+    --light-blue: #E3F8FF;
+    --red: #FF0000;
+    --light-red: #FFE1E1;
+    --gray: #666666;
+    --light-gray: #D4D4D4;
+    --white: #FFFFFF;
+    --price-per-liter: 0.05855;
+    --font: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: var(--font);
+    background: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .phone-wrapper {
+    width: 393px;
+    max-width: 100vw;
+    min-height: 100vh;
+    background: white;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* SCREENS */
+  .screen {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+  }
+  .screen.active { display: flex; }
+
+  .scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 80px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .scroll-content::-webkit-scrollbar { display: none; }
+
+  /* TAB BAR */
+  .tab-bar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 393px;
+    max-width: 100vw;
+    height: 75px;
+    background: var(--navy);
+    border-radius: 40px 40px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 100;
+    box-shadow: 0 -2px 4px rgba(0,0,0,0.25);
+  }
+
+  .tab-btn {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px;
+    background: none;
+    border: none;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+  .tab-btn.active { opacity: 1; }
+  .tab-btn svg { width: 30px; height: 30px; }
+
+  /* BACK BUTTON */
+  .back-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+  }
+  .back-btn svg { width: 20px; height: 20px; }
+
+  /* TYPOGRAPHY */
+  h1 { font-size: 28px; font-weight: 700; color: var(--navy); }
+  h2 { font-size: 22px; font-weight: 700; color: var(--navy); }
+  h3 { font-size: 18px; font-weight: 600; color: var(--navy); }
+
+  /* CARDS */
+  .card {
+    border-radius: 20px;
+    padding: 20px;
+    margin: 0 16px 16px;
+  }
+  .card-green { background: var(--light-green); }
+  .card-blue { background: var(--light-blue); }
+  .card-white { background: white; border: 1px solid #eee; }
+  .card-gray { background: #F3F3F3; }
+
+  /* STREAK DROP */
+  .streak-drop {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* BUTTONS */
+  .btn-primary {
+    background: var(--navy);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 20px;
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+    transition: opacity 0.2s;
+  }
+  .btn-primary:active { opacity: 0.8; }
+
+  .btn-outline {
+    background: white;
+    color: var(--navy);
+    border: 1.5px solid var(--navy);
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: opacity 0.2s;
+  }
+  .btn-outline:active { opacity: 0.7; }
+
+  .btn-green {
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 14px 20px;
+    font-family: var(--font);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: calc(100% - 32px);
+    margin: 0 16px;
+    justify-content: center;
+  }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    background: white;
+    border-radius: 20px;
+    height: 14px;
+    width: 100%;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 20px;
+    background: var(--navy);
+    transition: width 0.5s ease;
+  }
+
+  /* ===================== STARTSIDE ===================== */
+  #home-screen .top-header {
+    padding: 50px 20px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  #home-screen .greeting h1 span { display: block; font-size: 32px; }
+
+  .mascot-drop {
+    width: 90px;
+    height: 130px;
+    flex-shrink: 0;
+  }
+
+  /* Sidebar uges forbrug card */
+  .forbrug-card {
+    background: var(--light-green);
+    border-radius: 20px;
+    padding: 16px 20px;
+    margin: 0 16px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .forbrug-card .left h3 { color: var(--green); font-size: 15px; font-weight: 600; }
+  .forbrug-card .big-num { font-size: 52px; font-weight: 700; color: var(--green); line-height: 1; }
+  .forbrug-card .big-num span { font-size: 18px; font-weight: 400; color: var(--green); }
+  .forbrug-card .sub-text { font-size: 11px; color: var(--green); margin-top: 2px; }
+
+  /* Uge section */
+  .section-title { font-size: 20px; font-weight: 700; color: var(--navy); padding: 0 20px 8px; }
+
+  .uge-card {
+    background: var(--light-blue);
+    border-radius: 20px;
+    padding: 16px;
+    margin: 0 16px 8px;
+  }
+  .uge-label { font-size: 13px; color: var(--navy); font-weight: 600; margin-bottom: 10px; }
+  .days-row {
+    display: flex;
+    gap: 4px;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .day-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .day-name { font-size: 10px; color: var(--navy); font-weight: 500; }
+  .day-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+    background: white;
+  }
+  .day-num.today {
+    background: var(--navy);
+    color: white;
+  }
+  .day-drop { font-size: 10px; color: var(--navy); margin-top: 2px; text-align: center; }
+  .day-drop svg { width: 14px; height: 18px; }
+  .total-row { font-size: 14px; color: var(--navy); }
+  .total-row strong { font-size: 32px; font-weight: 700; }
+
+  .saving-text {
+    font-size: 15px;
+    color: var(--navy);
+    padding: 4px 20px 16px;
+  }
+  .saving-text strong { font-size: 22px; font-weight: 700; }
+
+  /* Mål reminder card */
+  .maal-reminder {
+    background: var(--light-green);
+    border-radius: 20px;
+    padding: 16px 20px;
+    margin: 0 16px 16px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    cursor: pointer;
+    position: relative;
+  }
+  .maal-reminder p { font-size: 13px; color: var(--navy); line-height: 1.5; }
+  .maal-reminder p strong { font-weight: 700; }
+
+  /* Badges */
+  .badges-section { padding: 0 16px 16px; }
+  .badges-row { display: flex; gap: 12px; margin: 10px 0; }
+  .badge-item {
+    background: var(--light-green);
+    border-radius: 12px;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 120px;
+  }
+  .badge-medal { width: 60px; height: 60px; }
+  .badge-name { font-size: 12px; font-weight: 600; color: var(--navy); text-align: center; }
+
+  /* Mit mål card */
+  .mit-maal-card {
+    background: var(--light-blue);
+    border-radius: 20px;
+    padding: 16px 20px;
+    margin: 0 16px 24px;
+    cursor: pointer;
+    position: relative;
+  }
+  .mit-maal-card .date-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+  .mit-maal-card .maal-text { font-size: 13px; color: var(--navy); margin-bottom: 10px; }
+  .mit-maal-card .stats { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+  .mit-maal-card .stat-line { font-size: 13px; color: var(--navy); }
+  .mit-maal-card .stat-line strong { font-size: 28px; font-weight: 700; }
+  .mit-maal-card .stat-line span { font-size: 13px; }
+
+  .streak-corner {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  /* ===================== KALENDER ===================== */
+  #calendar-screen .screen-header {
+    padding: 50px 20px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #calendar-screen .screen-header h2 { flex: 1; }
+
+  .kalender-mascot {
+    position: absolute;
+    right: 20px;
+    top: 40px;
+    width: 70px;
+  }
+
+  .cal-reminder {
+    background: var(--light-green);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin: 0 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+  .cal-reminder p { font-size: 13px; color: var(--navy); line-height: 1.5; flex: 1; }
+
+  .month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px 12px;
+  }
+  .month-nav h3 { font-size: 18px; font-weight: 700; color: var(--navy); }
+  .month-arrow {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    font-size: 20px;
+    color: var(--navy);
+  }
+
+  .cal-grid {
+    padding: 0 16px;
+  }
+  .cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 6px;
+  }
+  .cal-wday { text-align: center; font-size: 11px; color: var(--navy); font-weight: 500; padding: 4px 0; }
+
+  .cal-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 50%;
+    color: var(--navy);
+    background: var(--light-blue);
+    cursor: default;
+  }
+  .cal-day.today { background: var(--navy); color: white; }
+  .cal-day.has-data { cursor: pointer; }
+  .cal-day.has-data:hover { background: #b0d8e8; }
+  .cal-day.other-month { background: transparent; color: #ccc; }
+  .cal-day.empty { background: transparent; }
+
+  /* Din måned i tal */
+  .maaned-stats { padding: 20px 16px 0; }
+  .maaned-stats h3 { margin-bottom: 12px; }
+  .maaned-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .maaned-card .left p { font-size: 13px; color: var(--navy); margin-bottom: 4px; }
+  .maaned-card .big { font-size: 36px; font-weight: 700; color: var(--navy); }
+  .maaned-card .big span { font-size: 16px; }
+  .maaned-card .sub { font-size: 13px; color: var(--navy); }
+  .maaned-card .drop-icon svg { width: 50px; height: 65px; }
+
+  /* ===================== DAGSOVERBLIK POPUP ===================== */
+  .popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 200;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .popup-overlay.open { display: flex; }
+
+  .popup-sheet {
+    background: white;
+    border-radius: 24px 24px 0 0;
+    width: 393px;
+    max-width: 100vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 12px 20px 40px;
+    transform: translateY(100%);
+    transition: transform 0.35s ease;
+  }
+  .popup-overlay.open .popup-sheet { transform: translateY(0); }
+
+  .sheet-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--light-gray);
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+
+  .dag-header { margin-bottom: 16px; }
+  .dag-header .dag-date { font-size: 22px; font-weight: 700; color: var(--navy); }
+  .dag-header .dag-sub { font-size: 13px; color: var(--gray); }
+
+  .enhed-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 14px;
+  }
+  .enhed-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .enhed-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .enhed-icon { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
+  .enhed-icon svg { width: 28px; height: 28px; }
+  .enhed-name { font-size: 15px; color: var(--navy); font-weight: 500; }
+  .enhed-liter { font-size: 22px; font-weight: 700; color: var(--navy); }
+  .enhed-liter span { font-size: 13px; font-weight: 400; }
+  .enhed-bar-wrap {
+    background: var(--light-gray);
+    border-radius: 4px;
+    height: 8px;
+    width: 100%;
+    overflow: hidden;
+  }
+  .enhed-bar { height: 100%; border-radius: 4px; background: var(--navy); }
+  .enhed-pct { text-align: right; font-size: 11px; color: var(--gray); margin-top: 2px; }
+
+  /* ===================== MÅLSÆTNINGER ===================== */
+  #goals-screen .screen-header {
+    padding: 50px 20px 16px;
+    position: relative;
+  }
+  #goals-screen .screen-header .mascot-small {
+    position: absolute;
+    right: 20px;
+    top: 40px;
+    width: 70px;
+  }
+
+  .maal-card-wrap {
+    margin: 0 16px 16px;
+    border-radius: 20px;
+    overflow: visible;
+    position: relative;
+  }
+
+  .aktiv-maal-card {
+    border-radius: 20px;
+    padding: 16px;
+    position: relative;
+    cursor: pointer;
+  }
+  .aktiv-maal-card.blue-card { background: var(--light-blue); }
+  .aktiv-maal-card.green-card { background: var(--light-green); }
+  .aktiv-maal-card.red-card { background: #FFE8E8; }
+  .aktiv-maal-card.gray-card { background: #F3F3F3; }
+
+  .maal-card-title { font-size: 13px; color: var(--navy); margin-bottom: 8px; line-height: 1.4; }
+  .maal-stats { display: flex; flex-direction: column; gap: 3px; margin-top: 8px; }
+  .maal-stat { font-size: 12px; color: var(--navy); }
+  .maal-stat strong { font-size: 24px; font-weight: 700; }
+
+  .inaktiv-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .btn-reactivate {
+    flex: 1;
+    background: white;
+    border: 1.5px solid var(--navy);
+    border-radius: 20px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--navy);
+    cursor: pointer;
+    font-family: var(--font);
+  }
+  .btn-delete {
+    background: var(--light-red);
+    border: 1.5px solid var(--red);
+    border-radius: 20px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--red);
+    cursor: pointer;
+    font-family: var(--font);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* ===================== OPRET MÅL ===================== */
+  #create-goal-screen .screen-header {
+    padding: 50px 20px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .forslag-card {
+    background: var(--light-green);
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin: 0 16px 12px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    border: 2px solid transparent;
+  }
+  .forslag-card:hover { opacity: 0.9; }
+  .forslag-card.selected { border-color: var(--green); }
+  .forslag-card h4 { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .forslag-card p { font-size: 13px; color: var(--navy); line-height: 1.4; }
+
+  .eget-maal-section {
+    margin: 16px 16px 24px;
+    background: #F3F3F3;
+    border-radius: 16px;
+    padding: 20px;
+  }
+  .eget-maal-section h3 { margin-bottom: 8px; font-size: 16px; }
+  .eget-maal-section p { font-size: 13px; color: var(--gray); margin-bottom: 16px; }
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .input-row input {
+    flex: 1;
+    border: 1.5px solid var(--light-gray);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 15px;
+    font-family: var(--font);
+    background: white;
+    color: var(--navy);
+  }
+  .input-row label { font-size: 13px; color: var(--navy); white-space: nowrap; }
+
+  /* ===================== STREAK DROP COMPONENT ===================== */
+  .drop-svg-wrap {
+    position: relative;
+    width: 50px;
+    height: 65px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .drop-svg-wrap .drop-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -55%);
+    text-align: center;
+    color: white;
+    font-family: var(--font);
+  }
+  .drop-svg-wrap .drop-text .num { font-size: 18px; font-weight: 700; line-height: 1; }
+  .drop-svg-wrap .drop-text .uger-txt { font-size: 9px; line-height: 1; }
+
+  .drop-svg-wrap-lg {
+    position: relative;
+    width: 70px;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .drop-svg-wrap-lg .drop-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -55%);
+    text-align: center;
+    color: white;
+    font-family: var(--font);
+  }
+  .drop-svg-wrap-lg .drop-text .num { font-size: 24px; font-weight: 700; line-height: 1; }
+  .drop-svg-wrap-lg .drop-text .uger-txt { font-size: 11px; line-height: 1; }
+
+  /* Section spacers */
+  .section-gap { height: 8px; }
+
+  /* Info rows */
+  .info-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--navy); margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<div class="phone-wrapper">
+
+  <!-- ========== STARTSIDE ========== -->
+  <div id="home-screen" class="screen active">
+    <div class="scroll-content">
+      <div class="top-header">
+        <div class="greeting">
+          <div style="font-size:20px; color:var(--navy);">Velkommen,</div>
+          <h1><span>Christian!</span></h1>
+        </div>
+        <!-- Mascot drop med øjne -->
+        <svg class="mascot-drop" viewBox="0 0 101 151" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g filter="url(#f0)">
+            <path d="M10.75 95.14C18.37 59.15 44.9 50.42 50.64 10C57.26 49.71 83.31 59.62 90.33 95.14C95.24 120 72.39 140.94 50.64 141C28.83 141.06 5.49 119.97 10.75 95.14Z" fill="#00A7E1" fill-opacity="0.13"/>
+          </g>
+          <path d="M15.04 94.74C21.83 61.97 45.5 54.02 50.62 17.21C56.53 53.37 79.77 62.4 86.03 94.74C90.41 117.38 70.03 136.44 50.62 136.5C31.17 136.56 10.35 117.35 15.04 94.74Z" fill="#00A7E1"/>
+          <ellipse cx="43" cy="77" rx="3.1" ry="5.3" fill="black"/>
+          <ellipse cx="58" cy="77" rx="3.1" ry="5.3" fill="black"/>
+          <ellipse cx="41.5" cy="76.5" rx="1.4" ry="2.4" fill="white"/>
+          <ellipse cx="56.5" cy="76.5" rx="1.4" ry="2.4" fill="white"/>
+          <defs><filter id="f0" x="0" y="0" width="101" height="151"><feGaussianBlur stdDeviation="5"/></filter></defs>
+        </svg>
+      </div>
+
+      <!-- Sidste uges forbrug -->
+      <div class="forbrug-card">
+        <div class="left">
+          <h3>Sidste uges forbrug</h3>
+          <div class="big-num" id="lastWeekLiters">1 247 <span>liter</span></div>
+          <div class="sub-text">Maks 1750 liter per uge</div>
+        </div>
+        <!-- Green streak drop -->
+        <div class="drop-svg-wrap-lg">
+          <svg viewBox="0 0 50 73" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
+            <path d="M4.39 41.77C8.34 24.12 22.1 19.83 25.07 0C28.5 19.48 42.01 24.35 45.65 41.77C48.2 53.97 36.35 64.24 25.07 64.27C13.76 64.3 1.66 53.95 4.39 41.77Z" fill="#128A00"/>
+          </svg>
+          <div class="drop-text"><div class="num">3</div><div class="uger-txt">uger</div></div>
+        </div>
+      </div>
+
+      <!-- Din uge -->
+      <div class="section-title">Din uge</div>
+      <div class="uge-card" id="uge-card">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Besparelse -->
+      <div class="saving-text" id="saving-text"></div>
+
+      <!-- Mål reminder -->
+      <div class="maal-reminder" onclick="showScreen('goals-screen')">
+        <div style="flex:1">
+          <p id="maal-reminder-text"></p>
+          <button class="btn-outline" style="margin-top:12px; width:fit-content" onclick="event.stopPropagation();showScreen('goals-screen')">
+            <svg width="16" height="16" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M31 15.5C31 24.06 24.06 31 15.5 31C6.94 31 0 24.06 0 15.5C0 6.94 6.94 0 15.5 0C24.06 0 31 6.94 31 15.5Z" fill="white"/>
+              <path d="M26.6 15.5C26.6 21.73 21.21 26.53 15.5 26.53C9.79 26.53 4.39 21.73 4.39 15.5C4.39 9.79 8.81 4.48 15.5 4.48C22.35 4.48 26.6 9.79 26.6 15.5ZM5.99 15.5C5.99 20.75 10.25 25.01 15.5 25.01C20.75 25.01 25.01 20.75 25.01 15.5C25.01 10.25 20.75 5.99 15.5 5.99C10.25 5.99 5.99 10.25 5.99 15.5Z" fill="black"/>
+              <circle cx="15.75" cy="16.49" r="4.29" fill="black"/>
+              <path d="M9.34 22.75C10.02 22.11 10.94 21.73 11.94 21.73H13.58C14.25 22.03 14.98 22.2 15.75 22.2C16.53 22.2 17.26 22.03 17.92 21.73H19.57C21.67 21.73 23.38 23.43 23.38 25.54V26.01C23.38 26.8 22.74 27.44 21.95 27.44H9.56C8.77 27.44 8.13 26.8 8.13 26.01V25.54C8.13 24.73 8.38 23.99 8.8 23.37L9.34 22.75Z" fill="black"/>
+            </svg>
+            Gå til målsætninger →
+          </button>
+        </div>
+        <!-- Green streak drop small -->
+        <div class="drop-svg-wrap">
+          <svg viewBox="0 0 50 73" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
+            <path d="M4.39 41.77C8.34 24.12 22.1 19.83 25.07 0C28.5 19.48 42.01 24.35 45.65 41.77C48.2 53.97 36.35 64.24 25.07 64.27C13.76 64.3 1.66 53.95 4.39 41.77Z" fill="#128A00"/>
+          </svg>
+          <div class="drop-text"><div class="num">3</div><div class="uger-txt">uger</div></div>
+        </div>
+      </div>
+
+      <!-- Mine badges -->
+      <div class="badges-section">
+        <div class="section-title" style="padding:0 0 8px;">Mine badges</div>
+        <div class="badges-row">
+          <div class="badge-item">
+            <svg class="badge-medal" viewBox="0 0 118 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" width="110" height="110" rx="10" fill="#E3F8FF"/>
+              <path d="M54.46 18.4L44.73 2.19C44.33 1.52 43.77 0.97 43.09 0.58C42.41 0.2 41.65 0 40.87 0H25.23C23.4 0 22.34 2.05 23.38 3.54L39.04 25.92C43.22 22.01 48.54 19.32 54.46 18.4ZM92.77 0H77.13C75.55 0 74.08 0.83 73.27 2.19L63.54 18.4C69.46 19.32 74.78 22.01 78.96 25.91L94.62 3.54C95.66 2.05 94.6 0 92.77 0ZM59 22.52C45.32 22.52 34.23 33.61 34.23 47.29C34.23 60.97 45.32 72.06 59 72.06C72.68 72.06 83.77 60.97 83.77 47.29C83.77 33.61 72.68 22.52 59 22.52ZM72.02 44.65L66.68 49.85L67.95 57.2C68.17 58.52 66.78 59.53 65.6 58.9L59 55.43L52.4 58.9C51.22 59.53 49.83 58.52 50.06 57.2L51.32 49.85L45.98 44.65C45.02 43.72 45.55 42.09 46.87 41.89L54.25 40.82L57.55 34.13C57.85 33.53 58.42 33.23 59 33.23C59.58 33.23 60.15 33.53 60.45 34.13L63.75 40.82L71.13 41.89C72.45 42.09 72.98 43.72 72.02 44.65Z" fill="#128A00"/>
+              <text x="59" y="96" text-anchor="middle" font-family="Helvetica Neue" font-size="11" font-weight="700" fill="#128A00">Den ambitiøse</text>
+            </svg>
+          </div>
+          <div class="badge-item">
+            <svg class="badge-medal" viewBox="0 0 118 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" width="110" height="110" rx="10" fill="#E3F8FF"/>
+              <path d="M54.46 18.4L44.73 2.19C44.33 1.52 43.77 0.97 43.09 0.58C42.41 0.2 41.65 0 40.87 0H25.23C23.4 0 22.34 2.05 23.38 3.54L39.04 25.92C43.22 22.01 48.54 19.32 54.46 18.4ZM92.77 0H77.13C75.55 0 74.08 0.83 73.27 2.19L63.54 18.4C69.46 19.32 74.78 22.01 78.96 25.91L94.62 3.54C95.66 2.05 94.6 0 92.77 0ZM59 22.52C45.32 22.52 34.23 33.61 34.23 47.29C34.23 60.97 45.32 72.06 59 72.06C72.68 72.06 83.77 60.97 83.77 47.29C83.77 33.61 72.68 22.52 59 22.52ZM72.02 44.65L66.68 49.85L67.95 57.2C68.17 58.52 66.78 59.53 65.6 58.9L59 55.43L52.4 58.9C51.22 59.53 49.83 58.52 50.06 57.2L51.32 49.85L45.98 44.65C45.02 43.72 45.55 42.09 46.87 41.89L54.25 40.82L57.55 34.13C57.85 33.53 58.42 33.23 59 33.23C59.58 33.23 60.15 33.53 60.45 34.13L63.75 40.82L71.13 41.89C72.45 42.09 72.98 43.72 72.02 44.65Z" fill="#128A00"/>
+              <text x="59" y="96" text-anchor="middle" font-family="Helvetica Neue" font-size="11" font-weight="700" fill="#128A00">Den vedholdende</text>
+            </svg>
+          </div>
+        </div>
+        <button class="btn-outline" onclick="showScreen('learn-screen')">
+          💡 Optjen flere badges →
+        </button>
+      </div>
+
+      <!-- Mit mål -->
+      <div class="section-title" style="padding:16px 20px 8px;">Mit mål</div>
+      <div class="mit-maal-card" onclick="showScreen('goals-screen')">
+        <div class="info-row">
+          <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" stroke="#0D2F4F" stroke-width="1.5" fill="none"/><path d="M8 4v4l3 1.5" stroke="#0D2F4F" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span id="maal-date-range" style="font-size:12px; color:var(--navy)"></span>
+        </div>
+        <div class="maal-text" id="maal-text-home">Mit mål er at bruge maks 1750 liter vand om ugen</div>
+        <div class="progress-wrap">
+          <div class="progress-fill" id="home-progress"></div>
+        </div>
+        <div class="stats" id="home-maal-stats"></div>
+        <div class="streak-corner">
+          <div class="drop-svg-wrap">
+            <svg viewBox="0 0 50 73" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
+              <path d="M4.39 41.77C8.34 24.12 22.1 19.83 25.07 0C28.5 19.48 42.01 24.35 45.65 41.77C48.2 53.97 36.35 64.24 25.07 64.27C13.76 64.3 1.66 53.95 4.39 41.77Z" fill="#128A00"/>
+            </svg>
+            <div class="drop-text"><div class="num">3</div><div class="uger-txt">uger<br>Streak</div></div>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <button class="btn-outline" onclick="event.stopPropagation();showScreen('goals-screen')">
+            <svg width="16" height="16" viewBox="0 0 31 31" fill="none"><circle cx="15.5" cy="15.5" r="15" stroke="#0D2F4F" stroke-width="1"/><circle cx="15.75" cy="16.49" r="4.29" fill="#0D2F4F"/><path d="M9.34 22.75C10.02 22.11 10.94 21.73 11.94 21.73H13.58C14.25 22.03 14.98 22.2 15.75 22.2C16.53 22.2 17.26 22.03 17.92 21.73H19.57C21.67 21.73 23.38 23.43 23.38 25.54V26.01C23.38 26.8 22.74 27.44 21.95 27.44H9.56C8.77 27.44 8.13 26.8 8.13 26.01V25.54C8.13 24.73 8.38 23.99 8.8 23.37L9.34 22.75Z" fill="#0D2F4F"/></svg>
+            Gå til målsætninger →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== KALENDER ========== -->
+  <div id="calendar-screen" class="screen">
+    <div class="scroll-content">
+      <div style="position:relative">
+        <div class="screen-header" style="padding-right:110px">
+          <button class="back-btn" onclick="showScreen('home-screen')">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#0D2F4F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div>
+            <h2>Overblik over dit<br>vandforbrug</h2>
+            <p style="font-size:13px;color:var(--gray);margin-top:4px">Gå ind på en dag og se et overblik</p>
+          </div>
+        </div>
+        <!-- Mascot -->
+        <svg class="kalender-mascot" viewBox="0 0 101 151" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15.04 94.74C21.83 61.97 45.5 54.02 50.62 17.21C56.53 53.37 79.77 62.4 86.03 94.74C90.41 117.38 70.03 136.44 50.62 136.5C31.17 136.56 10.35 117.35 15.04 94.74Z" fill="#00A7E1"/>
+          <ellipse cx="43" cy="77" rx="3.1" ry="5.3" fill="black"/>
+          <ellipse cx="58" cy="77" rx="3.1" ry="5.3" fill="black"/>
+          <ellipse cx="41.5" cy="76.5" rx="1.4" ry="2.4" fill="white"/>
+          <ellipse cx="56.5" cy="76.5" rx="1.4" ry="2.4" fill="white"/>
+        </svg>
+      </div>
+
+      <!-- Reminder -->
+      <div class="cal-reminder" onclick="showScreen('goals-screen')">
+        <p id="cal-reminder-text" style="flex:1"></p>
+        <div class="drop-svg-wrap" style="flex-shrink:0">
+          <svg viewBox="0 0 50 73" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
+            <path d="M4.39 41.77C8.34 24.12 22.1 19.83 25.07 0C28.5 19.48 42.01 24.35 45.65 41.77C48.2 53.97 36.35 64.24 25.07 64.27C13.76 64.3 1.66 53.95 4.39 41.77Z" fill="#128A00"/>
+          </svg>
+          <div class="drop-text"><div class="num">3</div><div class="uger-txt">uger</div></div>
+        </div>
+      </div>
+
+      <!-- Kalender -->
+      <div class="month-nav">
+        <button class="month-arrow" id="prev-month" onclick="changeMonth(-1)">‹</button>
+        <h3 id="month-label"></h3>
+        <button class="month-arrow" id="next-month" onclick="changeMonth(1)" style="visibility:hidden">›</button>
+      </div>
+      <div class="cal-grid">
+        <div class="cal-weekdays">
+          <div class="cal-wday">Man</div><div class="cal-wday">Tirs</div><div class="cal-wday">Ons</div>
+          <div class="cal-wday">Tors</div><div class="cal-wday">Fre</div><div class="cal-wday">Lør</div><div class="cal-wday">Søn</div>
+        </div>
+        <div class="cal-days" id="cal-days"></div>
+      </div>
+
+      <!-- Din måned i tal -->
+      <div class="maaned-stats">
+        <h3>Din måned i tal</h3>
+        <div class="maaned-card" id="cur-month-card"></div>
+        <div class="maaned-card" id="prev-month-card"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MÅLSÆTNINGER ========== -->
+  <div id="goals-screen" class="screen">
+    <div class="scroll-content">
+      <div style="position:relative">
+        <div class="screen-header" style="padding-right:110px">
+          <button class="back-btn" onclick="showScreen('home-screen')">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#0D2F4F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div>
+            <h2>Målsætninger</h2>
+            <p style="font-size:13px;color:var(--gray);margin-top:4px">Dine aktive og inaktive mål</p>
+          </div>
+        </div>
+        <svg style="position:absolute;right:20px;top:40px;width:70px" viewBox="0 0 101 151" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15.04 94.74C21.83 61.97 45.5 54.02 50.62 17.21C56.53 53.37 79.77 62.4 86.03 94.74C90.41 117.38 70.03 136.44 50.62 136.5C31.17 136.56 10.35 117.35 15.04 94.74Z" fill="#00A7E1"/>
+          <ellipse cx="43" cy="77" rx="3.1" ry="5.3" fill="black"/>
+          <ellipse cx="58" cy="77" rx="3.1" ry="5.3" fill="black"/>
+          <ellipse cx="41.5" cy="76.5" rx="1.4" ry="2.4" fill="white"/>
+          <ellipse cx="56.5" cy="76.5" rx="1.4" ry="2.4" fill="white"/>
+        </svg>
+      </div>
+
+      <button class="btn-green" onclick="showScreen('create-goal-screen')">
+        + Opret et nyt mål
+      </button>
+
+      <div style="margin:20px 16px 8px">
+        <div style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:12px">Aktive mål</div>
+        <div id="active-goals-container"></div>
+      </div>
+
+      <div style="margin:8px 16px 24px" id="inactive-goals-section">
+        <div style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:12px">Inaktive mål</div>
+        <div id="inactive-goals-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== OPRET MÅL ========== -->
+  <div id="create-goal-screen" class="screen">
+    <div class="scroll-content">
+      <div class="screen-header">
+        <button class="back-btn" onclick="showScreen('goals-screen')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#0D2F4F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h2>Opret et nyt mål</h2>
+      </div>
+
+      <div style="padding:0 20px 16px">
+        <p style="font-size:13px;color:var(--gray)">Vælg et af vores forslag eller lav dit eget mål</p>
+      </div>
+
+      <div style="margin:0 0 8px">
+        <div style="font-size:14px;font-weight:600;color:var(--navy);padding:0 20px 10px">Vores forslag</div>
+      </div>
+
+      <div class="forslag-card" onclick="activateGoal('spar20')">
+        <h4>💰 Spar 20 kr. om ugen</h4>
+        <p>Reducer dit vandforbrug med ca. 342 liter om ugen (fra 1.750L til 1.408L) og spar 20 kr. ugentligt baseret på vandprisen i Aarhus.</p>
+      </div>
+
+      <div class="forslag-card" onclick="activateGoal('reducer10')">
+        <h4>📉 Reducer vandforbrug med 10%</h4>
+        <p>Sæt et nyt ugentligt mål på 1.575 liter — 10% lavere end dit nuværende mål på 1.750 liter.</p>
+      </div>
+
+      <!-- Eget mål - fake/ikke funktionelt -->
+      <div class="eget-maal-section">
+        <h3>Lav dit eget mål</h3>
+        <p>Sæt dit eget ugentlige maksimumforbrug</p>
+        <div class="input-row">
+          <label>Maks forbrug:</label>
+          <input type="number" placeholder="f.eks. 1200" min="100" max="5000">
+          <label>liter/uge</label>
+        </div>
+        <button class="btn-primary" onclick="alert('Denne funktion er under udvikling')">
+          Opret mål
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== LÆR MERE ========== -->
+  <div id="learn-screen" class="screen">
+    <div class="scroll-content">
+      <div class="screen-header" style="padding:50px 20px 16px;display:flex;align-items:center;gap:8px">
+        <button class="back-btn" onclick="showScreen('home-screen')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#0D2F4F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h2>Lær mere om vand</h2>
+      </div>
+      <div style="padding:0 20px;text-align:center">
+        <p style="font-size:15px;color:var(--gray)">Denne side er under opbygning 💧</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB BAR -->
+  <nav class="tab-bar">
+    <!-- Pære - Lær mere -->
+    <button class="tab-btn" id="tab-learn" onclick="showScreen('learn-screen')">
+      <svg width="28" height="32" viewBox="0 0 22 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14.77 24.88L14.77 26.62C14.77 26.89 14.69 27.15 14.54 27.38L13.52 28.88C13.39 29.07 13.21 29.23 13.01 29.34C12.8 29.44 12.57 29.5 12.34 29.5H8.66C8.43 29.5 8.2 29.44 7.99 29.34C7.79 29.23 7.61 29.07 7.48 28.88L6.46 27.38V27.38C6.31 27.15 6.23 26.89 6.23 26.62L6.23 24.88H14.77ZM10.47 0.5C16.01 0.48 20.5 4.89 20.5 10.31C20.5 12.78 19.57 15.04 18.03 16.76C17.06 17.85 15.58 20.04 14.91 22H6.09C5.42 20.04 3.94 17.85 2.97 16.76C1.43 15.04 0.5 12.78 0.5 10.31C0.5 5.13 4.67 0.52 10.47 0.5ZM10.5 3.25C6.55 3.25 3.32 6.41 3.32 10.31C3.32 11.11 3.98 11.75 4.77 11.75C5.57 11.75 6.23 11.12 6.23 10.31C6.23 8.01 8.14 6.13 10.5 6.13C11.3 6.13 11.95 5.49 11.95 4.69C11.95 3.88 11.3 3.25 10.5 3.25Z" stroke="white" stroke-width="0.8" fill="none"/>
+      </svg>
+    </button>
+    <!-- Hus - Startside -->
+    <button class="tab-btn active" id="tab-home" onclick="showScreen('home-screen')">
+      <svg width="36" height="30" viewBox="0 0 39 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M19.5 8.1L7.2 18.19V28.93C7.2 29.22 7.32 29.5 7.53 29.7C7.74 29.9 8.03 31 8.33 31L16.11 28.98H16.11C16.23 28.98 16.3 28.96 16.38 28.93C16.45 28.9 16.51 28.86 16.56 28.81C16.61 28.76 16.65 28.7 16.68 28.62C16.71 28.55 16.72 28.48 16.72 28.41V22H21.17C21.59 22 21.99 21.83 22.28 21.54C22.57 21.25 22.74 20.85 22.75 22.43V28.91C22.75 29.06 22.81 29.2 22.92 29.31C23.03 29.42 23.18 29.48 23.33 29.48L31.11 31C31.41 31 31.69 28.89 31.9 28.68C32.11 28.47 32.23 28.19 32.23 27.89V18.19L19.5 8.1Z" stroke="white" stroke-width="1.2" fill="none"/>
+        <path d="M38.38 15.08L19.5 0.5L0.5 15.1L2.27 17.25L19.5 3.62L36.61 17.25L38.38 15.08Z" fill="white"/>
+      </svg>
+    </button>
+    <!-- Profil - Målsætninger -->
+    <button class="tab-btn" id="tab-goals" onclick="showScreen('goals-screen')">
+      <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M31 15.5C31 24.06 24.06 31 15.5 31C6.94 31 0 24.06 0 15.5C0 6.94 6.94 0 15.5 0C24.06 0 31 6.94 31 15.5Z" fill="white"/>
+        <path d="M26.6 15.5C26.6 21.73 21.21 26.53 15.5 26.53C9.79 26.53 4.39 21.73 4.39 15.5C4.39 9.79 8.81 4.48 15.5 4.48C22.35 4.48 26.6 9.79 26.6 15.5ZM5.99 15.5C5.99 20.75 10.25 25.01 15.5 25.01C20.75 25.01 25.01 20.75 25.01 15.5C25.01 10.25 20.75 5.99 15.5 5.99C10.25 5.99 5.99 10.25 5.99 15.5Z" fill="black"/>
+        <circle cx="15.75" cy="16.49" r="4.29" fill="black"/>
+        <path d="M9.34 22.75C10.02 22.11 10.94 21.73 11.94 21.73H13.58C14.25 22.03 14.98 22.2 15.75 22.2C16.53 22.2 17.26 22.03 17.92 21.73H19.57C21.67 21.73 23.38 23.43 23.38 25.54V26.01C23.38 26.8 22.74 27.44 21.95 27.44H9.56C8.77 27.44 8.13 26.8 8.13 26.01V25.54C8.13 24.73 8.38 23.99 8.8 23.37L9.34 22.75Z" fill="black"/>
+      </svg>
+    </button>
+  </nav>
+
+  <!-- ========== DAGSOVERBLIK POPUP ========== -->
+  <div class="popup-overlay" id="dag-popup" onclick="closeDagPopup(event)">
+    <div class="popup-sheet" id="dag-sheet">
+      <div class="sheet-handle"></div>
+      <div id="dag-content"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// DATA & CONSTANTS
+// ============================================================
+const PRICE = 0.05855; // kr per liter
+const WEEKLY_GOAL = 1750;
+const DAILY_GOAL = 250;
+
+const today = new Date();
+const todayDow = today.getDay(); // 0=Sun, 1=Mon...
+// Normalize to Monday=0
+const dayIndex = todayDow === 0 ? 6 : todayDow - 1;
+const dayNames = ['Man','Tirs','Ons','Tors','Fre','Lør','Søn'];
+const dayNamesFull = ['Mandag','Tirsdag','Onsdag','Torsdag','Fredag','Lørdag','Søndag'];
+const monthNames = ['januar','februar','marts','april','maj','juni','juli','august','september','oktober','november','december'];
+const monthNamesCapitalized = ['Januar','Februar','Marts','April','Maj','Juni','Juli','August','September','Oktober','November','December'];
+
+// Get Monday of current week
+function getMondayOfWeek(d) {
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  const monday = new Date(d);
+  monday.setDate(d.getDate() + diff);
+  return monday;
+}
+
+const weekMonday = getMondayOfWeek(today);
+
+// Generate week dates
+function getWeekDates(monday) {
+  return Array.from({length:7}, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d;
+  });
+}
+
+const weekDates = getWeekDates(weekMonday);
+
+// Generate seeded pseudo-random
+function seededRand(seed) {
+  let s = seed;
+  return function() {
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
+}
+
+function genDayUsage(dayOfYear, min, max) {
+  const r = seededRand(dayOfYear * 7 + 13);
+  return Math.round(min + r() * (max - min));
+}
+
+function getDayOfYear(d) {
+  const start = new Date(d.getFullYear(), 0, 0);
+  return Math.floor((d - start) / 86400000);
+}
+
+// Past days usage (for current week)
+let weekUsage = {}; // date-string -> liters
+for (let i = 0; i < dayIndex; i++) {
+  const d = weekDates[i];
+  const key = d.toDateString();
+  weekUsage[key] = genDayUsage(getDayOfYear(d), 120, 280);
+}
+// Today partial usage (slightly less than full day)
+const todayKey = today.toDateString();
+weekUsage[todayKey] = genDayUsage(getDayOfYear(today), 100, 210);
+
+function getTotalThisWeek() {
+  return Object.values(weekUsage).reduce((a,b) => a+b, 0);
+}
+
+// Savings calculation
+function calcSavings() {
+  const total = getTotalThisWeek();
+  const daysGone = dayIndex + 1; // days with data including today
+  const daysLeft = 7 - daysGone;
+  const avgSoFar = total / daysGone;
+  const projectedTotal = total + avgSoFar * daysLeft;
+  const savedLiters = Math.max(0, WEEKLY_GOAL - projectedTotal);
+  const savedKr = savedLiters * PRICE;
+  return { savedLiters: Math.round(savedLiters), savedKr: savedKr.toFixed(0) };
+}
+
+// Mål reminder text
+function getMaalReminderText() {
+  const total = getTotalThisWeek();
+  const remaining = Math.max(0, WEEKLY_GOAL - total);
+  const daysLeft = 7 - (dayIndex + 1);
+  const perDay = daysLeft > 0 ? Math.round(remaining / daysLeft) : 0;
+  return `Brug maks <strong>${perDay}L vand i dag</strong> for at opnå dit mål om maks 1.750 liter om ugen og behold din streak.`;
+}
+
+// ============================================================
+// GOALS STATE
+// ============================================================
+let goals = [
+  { id: 'main', label: 'Maks 1.750 liter vand om ugen', limit: 1750, active: true, weeks: 3, deletable: false },
+  { id: 'g700', label: 'Maks 700 liter vand om ugen', limit: 700, active: false, weeks: 0, deletable: true }
+];
+
+// ============================================================
+// SCREEN NAVIGATION
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+
+  // Tab bar active state
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if (id === 'home-screen') document.getElementById('tab-home').classList.add('active');
+  else if (id === 'goals-screen' || id === 'create-goal-screen') document.getElementById('tab-goals').classList.add('active');
+  else if (id === 'learn-screen') document.getElementById('tab-learn').classList.add('active');
+
+  if (id === 'goals-screen') renderGoals();
+  if (id === 'calendar-screen') renderCalendar();
+  if (id === 'home-screen') renderHome();
+}
+
+// ============================================================
+// RENDER HOME
+// ============================================================
+function renderHome() {
+  renderUgeCard();
+  renderSaving();
+  renderMaalReminder();
+  renderMitMaal();
+}
+
+function renderUgeCard() {
+  const weekNum = getWeekNumber(today);
+  let html = `<div class="uge-label">Uge ${weekNum}</div><div class="days-row">`;
+  weekDates.forEach((d, i) => {
+    const isToday = i === dayIndex;
+    const hasPast = i < dayIndex;
+    const hasCurrent = i === dayIndex;
+    const liters = weekUsage[d.toDateString()];
+    html += `<div class="day-col">
+      <div class="day-name">${dayNames[i]}</div>
+      <div class="day-num ${isToday ? 'today' : ''}">${d.getDate()}</div>
+      <div class="day-drop">`;
+    if (hasPast || hasCurrent) {
+      html += `<svg viewBox="0 0 14 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 10C3.5 4.5 7 3 7 0C7 0 10.5 4.5 12 10C13 14 10 18 7 18C4 18 1 14 2 10Z" fill="#00A7E1"/>
+      </svg>`;
+      if (hasPast || hasCurrent) html += `<div style="font-size:9px;color:var(--navy)">${liters}l</div>`;
+    } else {
+      html += `<svg viewBox="0 0 14 20" fill="none"><path d="M2 10C3.5 4.5 7 3 7 0C7 0 10.5 4.5 12 10C13 14 10 18 7 18C4 18 1 14 2 10Z" fill="#D4D4D4"/></svg><div style="font-size:9px;color:var(--gray)">...</div>`;
+    }
+    html += `</div></div>`;
+  });
+  html += `</div>`;
+  const total = getTotalThisWeek();
+  html += `<div class="total-row">Du har brugt <strong>${total}</strong> <span>liter</span></div>`;
+  document.getElementById('uge-card').innerHTML = html;
+}
+
+function renderSaving() {
+  const {savedLiters, savedKr} = calcSavings();
+  const total = getTotalThisWeek();
+  const daysGone = dayIndex + 1;
+  const perDay = Math.round(total / daysGone);
+  const remaining = Math.max(0, WEEKLY_GOAL - total);
+  const daysLeft = 7 - daysGone;
+  const proj = total + perDay * daysLeft;
+  const savedL = Math.max(0, WEEKLY_GOAL - proj);
+  const savedK = (savedL * PRICE).toFixed(0);
+  document.getElementById('saving-text').innerHTML =
+    `Du har i alt sparet <strong>${savedK} kr</strong> i denne uge!`;
+}
+
+function renderMaalReminder() {
+  document.getElementById('maal-reminder-text').innerHTML = getMaalReminderText();
+  document.getElementById('cal-reminder-text').innerHTML = getMaalReminderText();
+}
+
+function renderMitMaal() {
+  const total = getTotalThisWeek();
+  const pct = Math.min(100, Math.round(total / WEEKLY_GOAL * 100));
+  const remaining = Math.max(0, WEEKLY_GOAL - total);
+  const kr = (total * PRICE).toFixed(0);
+
+  document.getElementById('home-progress').style.width = pct + '%';
+
+  // Date range
+  const endDate = new Date(weekMonday);
+  endDate.setDate(weekMonday.getDate() + 6);
+  document.getElementById('maal-date-range').textContent =
+    `${weekMonday.getDate()}. ${monthNames[weekMonday.getMonth()]} → ${endDate.getDate()}. ${monthNames[endDate.getMonth()]}`;
+
+  document.getElementById('home-maal-stats').innerHTML = `
+    <div class="stat-line">Du har brugt <strong>${total}</strong> <span>liter</span></div>
+    <div class="stat-line">Svarende til ${kr} DKK</div>
+    <div class="stat-line" style="margin-top:4px;font-size:12px;color:var(--navy)">
+      Du har <strong style="font-size:20px">${remaining}</strong> liter vand tilbage resten af ugen for at opnå dit mål
+    </div>
+  `;
+}
+
+function getWeekNumber(d) {
+  const date = new Date(d.getTime());
+  date.setHours(0,0,0,0);
+  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+  const week1 = new Date(date.getFullYear(), 0, 4);
+  return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+}
+
+// ============================================================
+// RENDER CALENDAR
+// ============================================================
+let calMonth = today.getMonth();
+let calYear = today.getFullYear();
+
+function renderCalendar() {
+  const mn = monthNamesCapitalized[calMonth];
+  document.getElementById('month-label').textContent = `${mn} ${calYear}`;
+
+  // Prev/next arrows
+  const prevMonth = calMonth === 0 ? 11 : calMonth - 1;
+  const prevYear = calMonth === 0 ? calYear - 1 : calYear;
+  document.getElementById('prev-month').style.visibility = 'visible';
+  document.getElementById('next-month').style.visibility =
+    (calMonth === today.getMonth() && calYear === today.getFullYear()) ? 'hidden' : 'visible';
+
+  // Build calendar grid
+  const firstDay = new Date(calYear, calMonth, 1);
+  let startDow = firstDay.getDay();
+  startDow = startDow === 0 ? 6 : startDow - 1; // Monday first
+
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+  let html = '';
+  // Empty cells before first
+  for (let i = 0; i < startDow; i++) html += `<div class="cal-day empty"></div>`;
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const thisDate = new Date(calYear, calMonth, d);
+    const isToday = thisDate.toDateString() === today.toDateString();
+    const isPast = thisDate < today && !isToday;
+    const isFuture = thisDate > today;
+
+    let cls = 'cal-day';
+    if (isToday) cls += ' today';
+    if (isPast) cls += ' has-data';
+    let onclick = isPast ? `openDagPopup(${calYear},${calMonth},${d})` : '';
+    html += `<div class="${cls}" ${isPast?`onclick="${onclick}"`:''}>${d}</div>`;
+  }
+  document.getElementById('cal-days').innerHTML = html;
+  renderMaanedStats();
+}
+
+function changeMonth(dir) {
+  calMonth += dir;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  // Only allow going back 1 month
+  if (calMonth > today.getMonth() && calYear >= today.getFullYear()) {
+    calMonth = today.getMonth(); calYear = today.getFullYear();
+  }
+  renderCalendar();
+}
+
+function renderMaanedStats() {
+  const isCurrentMonth = calMonth === today.getMonth() && calYear === today.getFullYear();
+
+  // Current month total (days so far)
+  let curTotal = 0;
+  const daysInCur = isCurrentMonth ? today.getDate() : new Date(calYear, calMonth + 1, 0).getDate();
+  for (let d = 1; d <= daysInCur; d++) {
+    const date = new Date(calYear, calMonth, d);
+    if (date > today) break;
+    curTotal += genDayUsage(getDayOfYear(date), 120, 280);
+  }
+  const curKr = (curTotal * PRICE).toFixed(0);
+  const curMn = monthNames[calMonth];
+
+  // Previous month total
+  const prevMon = calMonth === 0 ? 11 : calMonth - 1;
+  const prevYr = calMonth === 0 ? calYear - 1 : calYear;
+  const daysInPrev = new Date(prevYr, prevMon + 1, 0).getDate();
+  let prevTotal = 0;
+  for (let d = 1; d <= daysInPrev; d++) {
+    prevTotal += genDayUsage(getDayOfYear(new Date(prevYr, prevMon, d)), 120, 280);
+  }
+  const prevKr = (prevTotal * PRICE).toFixed(0);
+  const prevMn = monthNames[prevMon];
+
+  document.getElementById('cur-month-card').innerHTML = `
+    <div class="left">
+      <p>Samlet forbrug i ${curMn}:</p>
+      <div class="big">${curTotal.toLocaleString('da-DK')} <span>liter</span></div>
+      <div class="sub">Svarer til: ${curKr} kr.</div>
+    </div>
+    <div class="drop-icon">
+      <svg viewBox="0 0 101 151" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M15.04 94.74C21.83 61.97 45.5 54.02 50.62 17.21C56.53 53.37 79.77 62.4 86.03 94.74C90.41 117.38 70.03 136.44 50.62 136.5C31.17 136.56 10.35 117.35 15.04 94.74Z" fill="#00A7E1"/>
+      </svg>
+    </div>
+  `;
+
+  document.getElementById('prev-month-card').innerHTML = `
+    <div class="left">
+      <p>Samlet forbrug i ${prevMn}:</p>
+      <div class="big">${prevTotal.toLocaleString('da-DK')} <span>liter</span></div>
+      <div class="sub">Svarer til: ${prevKr} kr.</div>
+    </div>
+    <div class="drop-icon">
+      <svg viewBox="0 0 101 151" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M15.04 94.74C21.83 61.97 45.5 54.02 50.62 17.21C56.53 53.37 79.77 62.4 86.03 94.74C90.41 117.38 70.03 136.44 50.62 136.5C31.17 136.56 10.35 117.35 15.04 94.74Z" fill="#00A7E1"/>
+      </svg>
+    </div>
+  `;
+}
+
+// ============================================================
+// DAGSOVERBLIK POPUP
+// ============================================================
+function openDagPopup(year, month, day) {
+  const date = new Date(year, month, day);
+  const doy = getDayOfYear(date);
+
+  // Generate realistic device distribution
+  const total = genDayUsage(doy, 150, 280);
+  const r = seededRand(doy * 13 + 7);
+  const hasHaveslange = r() > 0.7;
+
+  // Proportional distribution
+  const toilet = Math.round(total * (0.28 + r() * 0.08));
+  const bruser = Math.round(total * (0.30 + r() * 0.08));
+  const vand = Math.round(total * (0.15 + r() * 0.06));
+  const opvask = Math.round(total * (0.10 + r() * 0.05));
+  const vask = Math.round(total * (0.08 + r() * 0.05));
+  const have = hasHaveslange ? total - toilet - bruser - vand - opvask - vask : 0;
+  const vandmaaler = total;
+
+  const devices = [
+    { name: 'Vandmåler', liters: vandmaaler, pct: 100, icon: iconVandmaaler },
+    { name: 'Toilet', liters: toilet, pct: Math.round(toilet/vandmaaler*100), icon: iconToilet },
+    { name: 'Bruser', liters: bruser, pct: Math.round(bruser/vandmaaler*100), icon: iconBruser },
+    { name: 'Vandhaner', liters: vand, pct: Math.round(vand/vandmaaler*100), icon: iconVandhane },
+    { name: 'Opvaskemaskine', liters: opvask, pct: Math.round(opvask/vandmaaler*100), icon: iconOpvask },
+    { name: 'Vaskemaskine', liters: vask, pct: Math.round(vask/vandmaaler*100), icon: iconVask },
+    { name: 'Haveslange', liters: have, pct: have > 0 ? Math.round(have/vandmaaler*100) : 0, icon: iconHave }
+  ];
+
+  const dayDk = ['søndag','mandag','tirsdag','onsdag','torsdag','fredag','lørdag'];
+  const dateStr = `${day}. ${monthNames[month]}`;
+
+  let html = `
+    <div class="dag-header">
+      <div class="dag-date">${day < 10 ? '0'+day : day} <span style="font-size:16px;font-weight:400;color:var(--gray)">${monthNamesCapitalized[month]}</span></div>
+      <div class="dag-sub">Forbrug fordelt på enheder</div>
+    </div>
+  `;
+
+  devices.forEach(dev => {
+    html += `
+      <div class="enhed-row">
+        <div class="enhed-top">
+          <div class="enhed-left">
+            <div class="enhed-icon">${dev.icon}</div>
+            <div class="enhed-name">${dev.name}</div>
+          </div>
+          <div class="enhed-liter">${dev.liters} <span>liter</span></div>
+        </div>
+        <div class="enhed-bar-wrap"><div class="enhed-bar" style="width:${dev.pct}%"></div></div>
+        <div class="enhed-pct">${dev.pct} %</div>
+      </div>
+    `;
+  });
+
+  document.getElementById('dag-content').innerHTML = html;
+  const overlay = document.getElementById('dag-popup');
+  overlay.style.display = 'flex';
+  setTimeout(() => overlay.classList.add('open'), 10);
+
+  // Swipe down to close
+  const sheet = document.getElementById('dag-sheet');
+  let startY = 0;
+  sheet.addEventListener('touchstart', e => { startY = e.touches[0].clientY; });
+  sheet.addEventListener('touchend', e => {
+    if (e.changedTouches[0].clientY - startY > 60) closeDagPopup();
+  });
+}
+
+function closeDagPopup(e) {
+  if (e && e.target !== document.getElementById('dag-popup')) return;
+  const overlay = document.getElementById('dag-popup');
+  overlay.classList.remove('open');
+  setTimeout(() => overlay.style.display = 'none', 350);
+}
+
+// ============================================================
+// DEVICE ICONS (inline SVG)
+// ============================================================
+const iconVandmaaler = `<svg width="21" height="31" viewBox="0 0 21 31" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.09 25.26C12.27 25.48 11.4 25.6 10.5 25.6C9.67 25.6 8.86 25.5 8.09 25.31M13.09 25.26V27.13M13.09 25.26C17.36 24.1 20.5 20.16 20.5 15.48C20.5 10.81 17.36 6.87 13.09 5.71M8.09 25.31V27.13M8.09 25.31C3.73 24.22 0.5 20.23 0.5 15.48C0.5 10.81 3.64 6.87 7.91 5.71M8.09 27.13H13.09M8.09 27.13H7.6C7.15 27.13 6.8 27.49 6.8 27.94V29.69C6.8 30.14 7.15 30.5 7.6 30.5H13.4C13.85 30.5 14.2 30.14 14.2 29.69V27.94C14.2 27.49 13.85 27.13 13.4 27.13H13.09M7.91 5.71C8.73 5.49 9.6 5.37 10.5 5.37C11.4 5.37 12.27 5.49 13.09 5.71M7.91 5.71V3.87M13.09 5.71V3.87M13.09 3.87H7.91M13.09 3.87H13.4C13.85 3.87 14.2 3.51 14.2 3.06V1.31C14.2 0.86 13.85 0.5 13.4 0.5H7.6C7.15 0.5 6.8 0.86 6.8 1.31V3.06C6.8 3.51 7.15 3.87 7.6 3.87H7.91M18.26 15.32C18.26 19.56 14.78 22.99 10.5 22.99C6.22 22.99 2.74 19.56 2.74 15.32C2.74 11.09 6.22 7.65 10.5 7.65C14.78 7.65 18.26 11.09 18.26 15.32ZM6.48 15.11H14.52C14.96 15.11 15.31 14.75 15.31 14.3V12.17C15.31 11.73 14.96 11.36 14.52 11.36H6.48C6.04 11.36 5.68 11.73 5.68 12.17V14.3C5.68 14.75 6.04 15.11 6.48 15.11ZM10.5 16.61C11.24 17.73 11.98 18.66 11.98 19.42C11.98 20.17 11.5 20.65 10.5 20.73C9.59 20.76 9.02 19.98 9.02 19.42C9.02 18.29 9.94 17.36 10.5 16.61Z" stroke="#1B3B5F" stroke-width="0.8"/></svg>`;
+
+const iconToilet = `<svg width="20" height="31" viewBox="0 0 20 31" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.42 14.18H1.74C0.09 14.18 0.09 17.09 1.74 17.09H2.72M2.42 14.18L4.9 4.21C5.37 2.46 5.84 2.27 8.74 2.25M2.42 14.18H17.46M17.46 14.18H18.29C19.87 14.18 19.94 17.09 18.29 17.09H17.46M17.46 14.18C17.46 14.18 15.65 5.74 15.05 4.21C14.38 2.5 14.1 2.28 11.14 2.25M8.74 2.25C9.1 2.25 9.5 2.25 9.94 2.25C10.45 2.25 10.74 2.25 11.14 2.25M8.74 2.25C8.74 1.52 8.74 0.5 9.94 0.5C11.14 0.5 11.14 1.52 11.14 2.25M2.72 17.09H17.46M2.72 17.09C2.95 18.06 4 19.8 5.77 21.02M17.46 17.09C17.27 18.23 16.31 19.87 14.66 21.02M5.77 21.02C6.94 21.82 8.41 22.4 10.16 22.4C11.99 22.4 13.5 21.83 14.66 21.02M5.77 21.02C6.12 24.24 4.97 27.13 4.97 27.93C4.97 31.36 15.28 31.36 15.28 27.93C15.28 26.84 14.15 24.95 14.66 21.02" stroke="#1B3B5F"/></svg>`;
+
+const iconBruser = `<svg width="27" height="30" viewBox="0 0 27 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.52 2.72C3.91-1.23 10.81-1.23 13.69 5.06C15.25 4.94 16.61 4.98 17.85 5.54C19.09 6.11 20.1 7.15 21.1 8.8L21.14 8.78C22.74 8.04 24.33 8.37 24.99 9.63C25.62 10.85 25.07 12.4 23.62 13.49L23.59 13.51L13.6 19.51L13.58 19.53L13.55 19.54C12.69 19.97 11.85 20.1 11.12 19.93C10.39 19.76 9.82 19.29 9.51 18.66C8.91 17.39 9.48 15.8 11.04 14.81C10.49 12.79 10.08 11.06 10.18 9.58C10.27 8.02 10.91 6.76 12.26 5.63C9.78 0.28 4.44 0.88 2.85 3.51C2.41 4.24 2.1 5.25 1.89 6.66C1.68 8.06 1.58 9.8 1.55 11.96C1.49 16.3 1.69 22.1 1.69 30H0.14C0.14 22.2-0.05 16.26 0.01 11.94C0.04 9.76 0.14 8.06 0.36 6.43C0.58 4.93 0.94 3.69 1.52 2.72Z" stroke="#1B3B5F" stroke-width="0.5"/><circle cx="25.04" cy="18.33" r="1.3" fill="#1B3B5F"/><circle cx="24.26" cy="24.56" r="1.3" fill="#1B3B5F"/><circle cx="18.33" cy="22.01" r="1.3" fill="#1B3B5F"/></svg>`;
+
+const iconVandhane = `<svg width="38" height="31" viewBox="0 0 38 31" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M28.41 19.59H37.5C37.5 24.03 33.15 30.5 29.05 30.5H9.46C4.64 30.5 0.5 24.66 0.5 19.59H16.76M28.41 19.59V16.29C28.41 15.65 27.13 15.4 25.72 15.4C23.98 15.4 22.9 15.65 22.9 16.29V19.59M28.41 19.59H22.9M22.9 19.59H20.09M16.76 19.59C16.76 19.59 16.76 10.83 16.76 7.66C16.76 2.84 18.82 1.51 20.86 0.81C22.34 0.3 24.03 0.45 25.72 1.06C28.03 1.89 29.43 5.12 29.43 7.66H26.36C26.36 5.12 25 3.34 23.16 3.34C21.32 3.34 20.09 4.1 20.09 7.66V19.59M16.76 19.59H20.09M14.2 16.29C14.2 15.65 12.92 15.4 11.51 15.4C9.77 15.4 8.69 15.65 8.69 16.29V19.59H14.2V16.29Z" stroke="#1B3B5F"/></svg>`;
+
+const iconOpvask = `<svg width="26" height="31" viewBox="0 0 26 31" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.5 5.69V0.5H25.5V5.69M0.5 5.69V30.5H25.5V5.69M0.5 5.69H25.5M4.7 3.78C4.7 3.78 4.7 2.1 6.16 2.1C7.53 2.1 7.53 3.78 7.53 3.78M18.54 3.78C18.54 3.78 17.74 3.46 17.7 3.02C17.66 2.54 18.54 2.1 18.54 2.1H21.6C21.6 2.1 22.49 2.54 22.44 3.02C22.4 3.46 21.6 3.78 21.6 3.78" stroke="#1B3B5F"/></svg>`;
+
+const iconVask = `<svg width="26" height="31" viewBox="0 0 26 31" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.5 5.69V0.5H25.5V5.69M0.5 5.69V30.5H25.5V5.69M0.5 5.69H25.5M6 3.78C6 3.78 6 2.1 7.46 2.1C8.83 2.1 8.83 3.78 8.83 3.78M1.88 3.78C1.88 3.78 1.88 2.1 3.33 2.1C4.7 2.1 4.7 3.78 4.7 3.78M19.77 3.78C19.77 3.78 18.97 3.46 18.93 3.02C18.88 2.54 19.77 2.1 19.77 2.1H22.82C22.82 2.1 23.71 2.54 23.67 3.02C23.62 3.46 22.82 3.78 22.82 3.78M18.77 15.99C18.77 15.99 17.32 11.14 13.04 11.11C9.83 11.09 7.29 13.71 7.23 16.91C7.16 20.18 9.52 22.79 13.04 22.79C17.17 22.79 18.77 18.21 18.77 18.21C17.78 18.21 16.25 18.36 16.25 17.06C16.25 15.77 17.85 15.99 18.77 15.99ZM13.04 25.31C17.6 25.29 21.23 21.62 21.3 17.06C21.36 12.45 17.66 8.61 13.04 8.59C8.39 8.57 4.64 12.43 4.7 17.06C4.77 21.64 8.46 25.33 13.04 25.31ZM12.89 4.16C13.58 4.16 14.16 3.71 14.26 3.02C14.38 2.23 13.69 1.49 12.89 1.49C12.08 1.49 11.39 2.23 11.51 3.02C11.61 3.71 12.19 4.16 12.89 4.16Z" stroke="#1B3B5F"/></svg>`;
+
+const iconHave = `<svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.06 6.66C17.84 7.7 19.82 10.36 19.69 13.47C19.53 17.28 16.43 20.13 12.63 20.19C8.75 20.25 5.49 17.34 5.33 13.47C5.2 10.29 7.54 7.51 10.42 6.52M15.06 6.66V2.39M15.06 6.66C17.84 7.7 19.82 10.36 19.69 13.47M10.42 6.52V2.39M10.42 6.52C7.54 7.51 5.2 10.29 5.33 13.47C5.49 17.34 8.75 20.25 12.63 20.19C16.43 20.13 19.53 17.28 19.69 13.47M1.27 13.47V26.21L2.32 30.38H4.63L5.79 26.21V22.05M1.27 13.47C1.34 17.04 3.12 20.11 5.79 22.05M1.27 13.47C1.16 8.08 5.33 3.5 10.42 2.39M10.42 2.39H14.82M14.82 2.39V0.5H10.42V2.39M14.82 2.39H26.06V6.52H14.82M14.82 6.52V2.39M14.82 6.52C17.48 2.92 19.87 4.44 21.55 6.52H26.06M5.79 26.21H7.07M26.06 2.39H30V6.52H26.06M26.06 2.39V0.97M26.06 6.52V7.91M0 26.21H1.27" stroke="#1B3B5F"/></svg>`;
+
+// ============================================================
+// RENDER GOALS
+// ============================================================
+function renderGoals() {
+  const total = getTotalThisWeek();
+  const activeHtml = goals
+    .filter(g => g.active)
+    .map(g => renderGoalCard(g, total))
+    .join('');
+  document.getElementById('active-goals-container').innerHTML = activeHtml || '<p style="font-size:13px;color:var(--gray);padding:8px 0">Ingen aktive mål endnu</p>';
+
+  const inactiveGoals = goals.filter(g => !g.active);
+  const inactiveHtml = inactiveGoals.map(g => renderGoalCard(g, total)).join('');
+  document.getElementById('inactive-goals-container').innerHTML = inactiveHtml || '<p style="font-size:13px;color:var(--gray);padding:8px 0">Ingen inaktive mål</p>';
+  document.getElementById('inactive-goals-section').style.display = inactiveGoals.length > 0 ? 'block' : 'none';
+}
+
+function renderGoalCard(g, total) {
+  const pct = Math.min(100, Math.round(total / g.limit * 100));
+  const remaining = Math.max(0, g.limit - total);
+  const kr = (total * PRICE).toFixed(0);
+
+  let cardColor = 'blue-card';
+  let dropColor = '#128A00';
+  let dropTextColor = 'white';
+
+  if (!g.active) {
+    cardColor = 'gray-card';
+    dropColor = '#6E6E6E';
+  } else if (total > g.limit) {
+    cardColor = 'red-card';
+    dropColor = '#CC0000';
+  } else if (g.id !== 'main') {
+    cardColor = 'green-card';
+    dropColor = '#128A00';
+  }
+
+  const weekNum = getWeekNumber(today);
+  const endDate = new Date(weekMonday);
+  endDate.setDate(weekMonday.getDate() + 6);
+  const dateRange = `${weekMonday.getDate()}. ${monthNames[weekMonday.getMonth()]} → ${endDate.getDate()}. ${monthNames[endDate.getMonth()]}`;
+
+  let actionsHtml = '';
+  if (!g.active) {
+    actionsHtml = `
+      <div class="inaktiv-actions">
+        <button class="btn-reactivate" onclick="reactivateGoal('${g.id}')">↑ Genaktiver mål</button>
+        ${g.deletable ? `<button class="btn-delete" onclick="deleteGoal('${g.id}')">✕ Slet</button>` : ''}
+      </div>`;
+  }
+
+  return `
+    <div class="aktiv-maal-card ${cardColor}" style="margin-bottom:12px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between">
+        <div style="flex:1">
+          <div class="info-row" style="margin-bottom:6px">
+            <svg width="14" height="14" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" stroke="#0D2F4F" stroke-width="1.5" fill="none"/><path d="M8 4v4l3 1.5" stroke="#0D2F4F" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span style="font-size:11px;color:var(--navy)">${dateRange}</span>
+          </div>
+          <div class="maal-card-title">Mit mål er at bruge maks ${g.limit.toLocaleString('da-DK')} liter vand om ugen</div>
+          <div class="progress-wrap"><div class="progress-fill" style="width:${pct}%;background:${total > g.limit ? '#CC0000' : 'var(--navy)'}"></div></div>
+          <div class="maal-stats">
+            <div class="maal-stat">Du har brugt <strong>${total}</strong> liter</div>
+            <div class="maal-stat">Svarende til ${kr} DKK</div>
+            <div class="maal-stat">Du har ${remaining} liter tilbage resten af ugen</div>
+          </div>
+        </div>
+        <div style="margin-left:12px;flex-shrink:0">
+          <div class="drop-svg-wrap">
+            <svg viewBox="0 0 50 73" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
+              <path d="M4.39 41.77C8.34 24.12 22.1 19.83 25.07 0C28.5 19.48 42.01 24.35 45.65 41.77C48.2 53.97 36.35 64.24 25.07 64.27C13.76 64.3 1.66 53.95 4.39 41.77Z" fill="${dropColor}"/>
+            </svg>
+            <div class="drop-text" style="color:${dropTextColor}"><div class="num">${g.weeks}</div><div class="uger-txt">uger<br>${g.active?'Streak':''}</div></div>
+          </div>
+        </div>
+      </div>
+      ${actionsHtml}
+    </div>`;
+}
+
+function reactivateGoal(id) {
+  const g = goals.find(g => g.id === id);
+  if (g) { g.active = true; g.weeks = 0; }
+  renderGoals();
+}
+
+function deleteGoal(id) {
+  goals = goals.filter(g => g.id !== id);
+  renderGoals();
+}
+
+// ============================================================
+// ACTIVATE NEW GOAL
+// ============================================================
+function activateGoal(type) {
+  let newGoal;
+  if (type === 'spar20') {
+    const newLimit = 1750 - 342;
+    newGoal = { id: 'spar20_' + Date.now(), label: `Spar 20 kr. om ugen (maks ${newLimit}L)`, limit: newLimit, active: true, weeks: 0, deletable: true };
+  } else if (type === 'reducer10') {
+    const newLimit = Math.round(1750 * 0.9);
+    newGoal = { id: 'red10_' + Date.now(), label: `Reducer med 10% (maks ${newLimit}L)`, limit: newLimit, active: true, weeks: 0, deletable: true };
+  }
+  if (newGoal) {
+    goals.push(newGoal);
+    showScreen('goals-screen');
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderHome();
+
+// Calendar click on "din uge" to go to calendar
+document.getElementById('uge-card').addEventListener('click', (e) => {
+  if (e.target.classList.contains('day-col') || e.target.closest('.day-col')) {
+    const col = e.target.closest('.day-col');
+    if (!col) return;
+    const idx = Array.from(col.parentNode.children).indexOf(col);
+    if (idx < dayIndex) {
+      const d = weekDates[idx];
+      showScreen('calendar-screen');
+      setTimeout(() => openDagPopup(d.getFullYear(), d.getMonth(), d.getDate()), 300);
+    }
+  }
+});
+</script>
+</body>
+</html>
