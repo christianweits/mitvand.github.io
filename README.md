@@ -2,30 +2,24 @@
 
 ## 📌 Formål
 
-Denne hjemmeside har til formål at engagere forbrugere i deres vandforbrug gennem en webbrowser.
-Ved at visualisere data og skabe interaktive elementer hjælper siden brugeren med at forstå og reducere deres daglige vandforbrug.
+Denne hjemmeside har til formål at undersøge forbruger engagement i forhold til vand i private husholdninger gennem en webbrowser.
+Ved hjælp af oplysning, visualisering og overblik hjælper siden brugeren med at forstå deres daglige vandforbrug og sætte personlige målsætninger.
 
 ## 🎯 Mål
 
 * Øge bevidstheden om vandforbrug
 * Motivere brugere til at spare på vandet
 * Præsentere vanddata på en enkel og visuel måde
-* Skabe engagement gennem interaktive funktioner
+* Skabe engagement gennem oplysninger 
 
 ## 🌐 Funktioner
 
 * Visualisering af vandforbrug
 * Brugervenlig webgrænseflade
-* Responsivt design (desktop og mobil)
-* Interaktive elementer der engagerer brugeren
-* Fokus på bæredygtighed og ressourcebesparelse
 
 ## 👥 Målgruppe
 
-* Husstande der ønsker at reducere vandforbrug
-* Studerende og undervisningsbrug
-* Miljøbevidste brugere
-* Offentlige eller private vandprojekter
+* Nye husejere
 
 ## 🛠️ Teknologier
 
@@ -36,7 +30,7 @@ Ved at visualisere data og skabe interaktive elementer hjælper siden brugeren m
 
 ## 🌱 Vision
 
-Projektet sigter mod at skabe større opmærksomhed omkring vandforbrug og hjælpe brugere med at tage mere bæredygtige valg i hverdagen gennem en enkel og tilgængelig webplatform.
+Projektet sigter mod at skabe større opmærksomhed omkring vandforbrug og hjælpe brugere med at tage mere bevidste valg i hverdagen gennem en enkel og tilgængelig webplatform.
 
 ## 🚀 Status
 
