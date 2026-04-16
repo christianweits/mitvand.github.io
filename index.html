@@ -5,470 +5,618 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>VandApp</title>
 <style>
-:root{
-  --navy:#0D2F4F;--blue:#00A8E0;--gd:#128A00;--lg:#D2F4DE;--lb:#E3F8FF;
-  --red:#CC0000;--lr:#FFE8E8;--gray:#666;--lgray:#E0E0E0;--dgray:#999;
-  --font:'Helvetica Neue',Helvetica,Arial,sans-serif;
-}
+/* ── RESET & BASE ── */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-body{font-family:var(--font);background:#f0f4f7;display:flex;justify-content:center;min-height:100vh;}
-.pw{width:393px;max-width:100vw;min-height:100vh;background:#fff;position:relative;overflow:hidden;display:flex;flex-direction:column;}
+:root{
+  --navy:#0D2F4F;--blue:#00A8E0;--gd:#128A00;--lg:#D2F4DE;--lb:#EAF7FF;
+  --red:#CC0000;--lr:#FFE8E8;--gray:#6B7A8D;--lgray:#E8EDF2;--dgray:#9BA8B5;
+  --gold:#B8860B;--gold-bg:#FFF3C4;
+  --badge-blue:#0077CC;--badge-blue-bg:#E0F0FF;
+  --badge-purple:#7B3FC4;--badge-purple-bg:#F0E8FF;
+  --font:'Helvetica Neue',Helvetica,Arial,sans-serif;
+  --radius:22px;
+  --shadow:0 4px 20px rgba(13,47,79,.09);
+  --shadow-lg:0 8px 36px rgba(13,47,79,.15);
+  --dropus-size:58px;
+  --dropus-top:52px;
+  --dropus-right:18px;
+}
+body{font-family:var(--font);background:#EDF2F7;display:flex;justify-content:center;min-height:100vh;}
+.pw{width:393px;max-width:100vw;min-height:100vh;background:#F5F8FB;position:relative;overflow:hidden;display:flex;flex-direction:column;}
 .screen{display:none;flex-direction:column;flex:1;overflow:hidden;}
 .screen.active{display:flex;}
-.sc{flex:1;overflow-y:auto;padding-bottom:90px;-webkit-overflow-scrolling:touch;}
+.sc{flex:1;overflow-y:auto;padding-bottom:96px;-webkit-overflow-scrolling:touch;}
 .sc::-webkit-scrollbar{display:none;}
 
-/* TAB BAR */
-.tab-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:393px;max-width:100vw;height:75px;background:var(--navy);border-radius:40px 40px 0 0;display:flex;align-items:center;justify-content:space-around;z-index:100;box-shadow:0 -2px 8px rgba(0,0,0,.2);}
-.tab-btn{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;cursor:pointer;padding:8px 4px 4px;background:none;border:none;opacity:.55;transition:opacity .2s;gap:4px;}
-.tab-btn.active{opacity:1;}
-.tab-lbl{font-size:10px;color:#fff;font-weight:400;}
-
-/* BACK BTN */
-.back-btn{background:none;border:none;cursor:pointer;padding:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-
-/* TYPOGRAPHY */
-h2{font-size:22px;font-weight:700;color:var(--navy);}
+/* ── TYPOGRAPHY ── */
+h2{font-size:22px;font-weight:700;color:var(--navy);letter-spacing:-.2px;}
 h3{font-size:16px;font-weight:600;color:var(--navy);}
+p,span,div,button,input,label{font-family:var(--font);}
 
-/* ─── SHARED SCREEN HEADER ───
-   Mascot floats in top-right. The .sh block only contains back+title.
-   We give the .sc enough top padding so nothing goes under the mascot.
-*/
-.sh{padding:50px 20px 14px;display:flex;align-items:center;gap:8px;position:relative;}
-.sh h2{flex:1;padding-right:70px;} /* reserve space so title doesn't overlap mascot */
-.sh-mascot{
-  position:absolute;right:20px;top:42px;
-  width:56px;height:auto;
-  pointer-events:none;
+/* ── TAB BAR ── */
+.tab-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:393px;max-width:100vw;height:76px;background:var(--navy);border-radius:26px 26px 0 0;display:flex;align-items:center;justify-content:space-around;z-index:100;box-shadow:0 -4px 28px rgba(13,47,79,.2);}
+.tab-btn{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;cursor:pointer;padding:10px 4px 6px;background:none;border:none;gap:4px;position:relative;}
+.tab-lbl{font-size:10px;color:rgba(255,255,255,.45);font-weight:500;transition:color .2s;}
+.tab-btn.active .tab-lbl{color:#fff;}
+.tab-icon{opacity:.4;transition:opacity .2s;}
+.tab-btn.active .tab-icon{opacity:1;}
+.tab-dot{width:4px;height:4px;border-radius:50%;background:var(--blue);opacity:0;transition:opacity .2s;margin-top:1px;}
+.tab-btn.active .tab-dot{opacity:1;}
+
+/* ── BACK BTN ── */
+.back-btn{background:none;border:none;cursor:pointer;padding:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:12px;}
+.back-btn:active{background:var(--lgray);}
+
+/* ── SHARED HEADER ──
+   Dropus lives INSIDE the header as inline — never overlaps content. */
+.sh{padding:50px 20px 14px;display:flex;align-items:center;gap:8px;}
+.sh h2{flex:1;}
+.top-header{padding:50px 20px 12px;display:flex;align-items:flex-start;justify-content:space-between;}
+
+/* Dropus inline — same size on every screen, no fixed positioning */
+.dropus-inline{width:58px;flex-shrink:0;cursor:pointer;align-self:flex-start;}
+.dropus-inline svg{display:block;width:100%;height:auto;}
+/* Old fixed element hidden */
+#dropus-rest{display:none;}
+
+/* ── DROPUS STAGE (centered animation) ── */
+.dropus-stage{position:fixed;inset:0;z-index:700;pointer-events:none;}
+.dropus-stage.active{pointer-events:auto;}
+.dropus-dim{position:absolute;inset:0;background:rgba(10,24,40,0);transition:background .35s;pointer-events:none;}
+.dropus-stage.active .dropus-dim{background:rgba(10,24,40,.54);}
+.dropus-center{
+  position:absolute;
+  left:50%;top:50%;
+  transform:translate(-50%,-58%) scale(.55);
+  opacity:0;
+  transition:transform .5s cubic-bezier(.34,1.2,.64,1), opacity .35s;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  width:280px;
 }
-/* First card/element after .sh must have enough top margin so it clears the mascot.
-   We handle this per-screen via .sh-gap */
-.sh-gap{height:0px;} /* override per screen if needed */
-
-/* SECTION TITLE */
-.sec-ttl{font-size:17px;font-weight:700;color:var(--navy);padding:0 20px 8px;}
-
-/* UNIVERSAL BUTTON — compact, half-width centred */
-.btn-under{
-  display:block;
-  width:auto;min-width:160px;max-width:220px;
-  margin:8px auto 18px;
-  padding:10px 20px;
-  background:#fff;border:1.5px solid var(--navy);border-radius:30px;
-  font-family:var(--font);font-size:13px;font-weight:600;color:var(--navy);
-  cursor:pointer;text-align:center;
+.dropus-stage.active .dropus-center{transform:translate(-50%,-58%) scale(1);opacity:1;}
+.dropus-center-svg{width:90px;flex-shrink:0;}
+.dropus-bubble-box{
+  background:#fff;border-radius:20px;
+  padding:18px 18px 14px;
+  box-shadow:0 10px 40px rgba(0,0,0,.18);
+  position:relative;width:100%;
 }
+.dropus-bubble-box::before{
+  content:'';position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+  border:6px solid transparent;border-bottom-color:#fff;
+}
+.dropus-typewriter{font-size:14px;color:var(--navy);line-height:1.6;min-height:44px;}
+.dropus-actions{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+.dco-yes{background:var(--blue);color:#fff;border:none;border-radius:12px;padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);width:100%;}
+.dco-no{background:var(--lgray);color:var(--navy);border:none;border-radius:12px;padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);width:100%;}
+.dropus-dismiss-btn{background:var(--navy);color:#fff;border:none;border-radius:12px;padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);width:100%;}
+
+/* Mouth animation */
+@keyframes mouthOpen{0%{d:path('M44 90 Q50.5 94 57 90');}100%{d:path('M44 90 Q50.5 100 57 90');}}
+.mouth-open{animation:mouthOpen .4s ease forwards;}
+@keyframes mascotShake{0%,100%{transform:rotate(0);}25%{transform:rotate(-12deg);}75%{transform:rotate(12deg);}}
+.mascot-shake{animation:mascotShake .45s ease;}
+
+/* ── SECTION TITLE ── */
+.sec-ttl{font-size:15px;font-weight:700;color:var(--navy);padding:0 20px 8px;}
+
+/* ── BUTTONS ── */
+.btn-under{display:block;min-width:160px;max-width:calc(100% - 32px);margin:6px 16px 16px;padding:11px 22px;background:#fff;border:1.5px solid var(--navy);border-radius:30px;font-size:13px;font-weight:600;color:var(--navy);cursor:pointer;text-align:center;}
 .btn-under:active{background:var(--lb);}
-.btn-primary{background:var(--navy);color:#fff;border:none;border-radius:30px;padding:12px 20px;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;width:100%;}
+.btn-primary{background:var(--navy);color:#fff;border:none;border-radius:30px;padding:13px 22px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;width:100%;}
 .btn-primary:active{opacity:.85;}
+.btn-green{background:linear-gradient(135deg,#1A6A1A,#128A00);color:#fff;border:none;border-radius:30px;padding:13px 22px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;width:100%;}
 
-/* PROGRESS BAR */
-.prog-wrap{background:rgba(13,47,79,.1);border-radius:20px;height:10px;width:100%;overflow:hidden;margin:8px 0;}
-.prog-fill{height:100%;border-radius:20px;background:var(--navy);transition:width .5s;}
+/* ── PROGRESS BAR ── */
+.prog-wrap{background:rgba(13,47,79,.08);border-radius:20px;height:8px;overflow:hidden;margin:8px 0;}
+.prog-fill{height:100%;border-radius:20px;background:var(--navy);transition:width .6s cubic-bezier(.4,0,.2,1);}
 
-/* ─── STARTSIDE ─── */
-.top-header{padding:50px 20px 10px;display:flex;justify-content:space-between;align-items:flex-start;}
+/* ─────── STARTSIDE ─────── */
+.greeting-word{font-size:30px;font-weight:700;color:var(--navy);letter-spacing:-.4px;}
 
-/* Streak card */
-.streak-card{background:var(--lb);border-radius:20px;padding:14px 16px;margin:0 16px 10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
-.streak-left h3{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:2px;}
-.streak-goal{font-size:11px;color:var(--gray);margin-bottom:6px;}
+.streak-card{background:var(--lb);border-radius:var(--radius);padding:16px 18px;margin:0 16px 10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;box-shadow:var(--shadow);}
+.streak-lbl{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:2px;}
+.streak-sub{font-size:11px;color:var(--gray);margin-bottom:8px;}
 .streak-status{display:flex;align-items:center;gap:6px;}
-.streak-check{width:18px;height:18px;background:var(--gd);border-radius:50%;display:flex;align-items:center;justify-content:center;}
-.streak-status span{font-size:13px;font-weight:600;color:var(--gd);}
+.streak-check{width:18px;height:18px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.streak-ok{font-size:13px;font-weight:600;color:var(--blue);}
 
-/* Uge card */
-.uge-card{background:var(--lb);border-radius:20px;padding:16px;margin:0 16px 8px;cursor:pointer;}
-.uge-label{font-size:13px;color:var(--navy);font-weight:600;margin-bottom:10px;}
-.days-row{display:flex;gap:3px;justify-content:space-between;margin-bottom:12px;}
-.day-col{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;flex:1;}
-.day-name{font-size:10px;color:var(--navy);font-weight:500;}
-.day-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--navy);background:#fff;}
+.uge-card{background:#fff;border-radius:var(--radius);padding:16px 18px;margin:0 16px 8px;cursor:pointer;box-shadow:var(--shadow);}
+.uge-lbl{font-size:11px;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;}
+.days-row{display:flex;gap:2px;justify-content:space-between;margin-bottom:12px;}
+.day-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}
+.day-name{font-size:10px;color:var(--dgray);font-weight:500;}
+.day-num{width:33px;height:33px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--navy);background:var(--lgray);}
 .day-num.today{background:var(--navy);color:#fff;}
-.day-lbl{font-size:9px;color:var(--navy);margin-top:1px;text-align:center;}
+.day-num.past{background:var(--lb);}
+.week-total-row{font-size:13px;color:var(--gray);}
+.week-total-row strong{font-size:29px;font-weight:700;color:var(--navy);}
 
-/* Spare-tekst inline with i-icon */
-.spare-row{display:flex;align-items:center;gap:6px;padding:4px 20px 2px;}
-.spare-tekst{font-size:13px;color:var(--navy);line-height:1.5;}
+.spare-row{display:flex;align-items:center;gap:6px;padding:3px 16px;}
+.spare-txt{font-size:13px;color:var(--navy);line-height:1.5;}
 .info-btn{background:none;border:none;cursor:pointer;padding:2px;display:flex;align-items:center;flex-shrink:0;}
-.info-bubble{background:var(--lb);border-radius:14px;padding:10px 14px;margin:4px 16px 8px;font-size:12px;color:var(--navy);line-height:1.6;display:none;border:1px solid rgba(0,168,224,.25);}
+.info-bubble{background:var(--lb);border-radius:14px;padding:10px 14px;margin:4px 16px 6px;font-size:12px;color:var(--navy);line-height:1.6;display:none;border:1px solid rgba(0,168,224,.2);}
 .info-bubble.open{display:block;}
 
-/* Mit mål card */
-.mit-maal{background:var(--lb);border-radius:20px;padding:16px;margin:0 16px 0;cursor:pointer;}
-.mm-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px;}
-.mm-info{flex:1;}
-.mm-date{font-size:11px;color:var(--gray);margin-bottom:3px;}
-.mm-title{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:4px;}
-.metrics-row{display:flex;}
-.metric-cell{flex:1;text-align:center;padding:7px 4px;border-right:1px solid rgba(13,47,79,.1);}
+.maal-card{background:#fff;border-radius:var(--radius);padding:18px;margin:0 16px;cursor:pointer;box-shadow:var(--shadow);}
+.maal-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--blue);margin-bottom:3px;}
+.maal-title{font-size:18px;font-weight:700;color:var(--navy);margin-bottom:2px;}
+.maal-sublbl{font-size:12px;color:var(--gray);margin-bottom:0;}
+.maal-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px;}
+.metrics-row{display:flex;background:var(--lb);border-radius:14px;overflow:hidden;margin-top:4px;}
+.metric-cell{flex:1;text-align:center;padding:10px 4px;border-right:1px solid rgba(13,47,79,.07);}
 .metric-cell:last-child{border-right:none;}
 .metric-val{font-size:18px;font-weight:700;color:var(--navy);line-height:1;}
-.metric-lbl{font-size:10px;color:var(--navy);opacity:.6;margin-top:2px;}
+.metric-lbl{font-size:10px;color:var(--gray);margin-top:2px;}
 
-/* Badges */
-.badges-sect{margin:0 16px 0;}
-.badges-row{display:flex;gap:10px;margin:10px 0 0;}
-.badge-item{background:var(--lb);border-radius:16px;padding:10px;display:flex;flex-direction:column;align-items:center;width:120px;cursor:pointer;overflow:hidden;}
+.badge-empty-box{background:var(--lb);border-radius:var(--radius);padding:16px 18px;margin:8px 16px 0;}
+.badge-empty-txt{font-size:13px;color:var(--gray);line-height:1.55;}
+.home-badges-row{display:flex;gap:10px;margin:8px 16px 0;flex-wrap:wrap;}
+.badge-home-item{border-radius:16px;padding:8px;display:flex;flex-direction:column;align-items:center;cursor:pointer;}
 
-/* ─── KALENDER ─── */
-.today-tip{background:var(--lb);border-radius:20px;padding:12px 16px;margin:0 16px 16px;}
-.today-tip p{font-size:13px;color:var(--navy);line-height:1.5;}
-.month-nav{display:flex;align-items:center;justify-content:space-between;padding:0 20px 10px;}
-.month-arrow{background:none;border:none;cursor:pointer;padding:4px 8px;font-size:22px;color:var(--navy);}
+/* ─────── KALENDER ─────── */
+/* Controls row: toggle + month label + cal icon */
+/* view toggle: Kalender / Graf */
+.view-toggle-btn{flex:1;padding:8px 10px;border:none;border-radius:11px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--dgray);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;}
+.view-toggle-btn.active{background:#fff;color:var(--navy);box-shadow:0 1px 6px rgba(0,0,0,.10);}
+/* month nav row */
+.month-nav-row{display:flex;align-items:center;padding:0 8px 12px;}
+.month-lbl{font-size:16px;font-weight:700;color:var(--navy);}
+.cal-icon-btn{background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;border-radius:8px;}
+.cal-icon-btn:active{background:var(--lgray);}
+.month-arrow{background:none;border:none;cursor:pointer;padding:6px 12px;font-size:22px;color:var(--navy);border-radius:10px;}
+.month-arrow:active{background:var(--lgray);}
+/* period sub-toggle */
+.period-btn{flex:1;padding:7px 8px;border:none;border-radius:9px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--dgray);transition:all .2s;}
+.period-btn.active{background:#fff;color:var(--navy);box-shadow:0 1px 4px rgba(0,0,0,.10);}
+
+/* Inline scroll picker */
+.scroll-picker-wrap{
+  display:none;
+  background:#fff;border-radius:var(--radius);
+  margin:0 16px 12px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  position:relative;
+}
+.scroll-picker-wrap.open{display:block;}
+.scroll-picker-inner{display:flex;height:160px;}
+.scroll-col{flex:1;overflow-y:scroll;-webkit-overflow-scrolling:touch;scroll-snap-type:y mandatory;position:relative;}
+.scroll-col::-webkit-scrollbar{display:none;}
+.scroll-item{height:40px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;color:var(--dgray);cursor:pointer;scroll-snap-align:center;transition:all .15s;}
+.scroll-item.sel{font-size:17px;font-weight:700;color:var(--navy);}
+/* highlight bar */
+.scroll-picker-wrap::after{
+  content:'';position:absolute;left:0;right:0;
+  top:50%;transform:translateY(-50%);
+  height:40px;background:rgba(0,168,224,.08);
+  border-radius:10px;pointer-events:none;margin:0 8px;
+}
+.scroll-picker-divider{width:1px;background:var(--lgray);align-self:stretch;flex-shrink:0;}
+
 .cal-grid{padding:0 16px;}
-.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;}
-.cal-wday{text-align:center;font-size:11px;color:var(--navy);font-weight:500;padding:4px 0;}
-.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
-.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;border-radius:50%;color:var(--navy);background:var(--lb);cursor:pointer;}
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:6px;}
+.cal-wday{text-align:center;font-size:11px;color:var(--dgray);font-weight:600;padding:4px 0;}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;border-radius:50%;color:var(--navy);background:var(--lb);cursor:pointer;}
+.cal-day:active{opacity:.75;}
 .cal-day.today{background:var(--navy);color:#fff;}
 .cal-day.future{background:transparent;color:var(--lgray);cursor:default;}
 .cal-day.empty{background:transparent;cursor:default;}
-.maaned-stats{padding:16px 16px 0;}
-.maaned-card{background:#fff;border-radius:16px;padding:14px 16px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
-.mc-lbl{font-size:12px;color:var(--navy);margin-bottom:4px;}
-.mc-big{font-size:30px;font-weight:700;color:var(--navy);line-height:1.1;}
-.mc-big span{font-size:14px;font-weight:400;}
-.mc-sub{font-size:11px;color:var(--gray);margin-top:2px;}
-.mc-compare{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;margin-top:6px;}
-.mc-compare.better{background:var(--lg);color:var(--gd);}
-.mc-compare.worse{background:var(--lr);color:var(--red);}
 
-/* ─── DAGSOVERBLIK POPUP ─── */
-.popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+/* Chart area */
+.chart-area{padding:0 16px 8px;display:none;}
+.chart-area.vis{display:block;}
+.cal-grid-wrap.hidden{display:none;}
+
+/* Stats cards */
+.stat-card{background:#fff;border-radius:var(--radius);padding:18px;margin-bottom:10px;box-shadow:var(--shadow);}
+.stat-lbl{font-size:12px;color:var(--gray);margin-bottom:6px;font-weight:500;}
+.stat-big{font-size:28px;font-weight:700;color:var(--navy);line-height:1;}
+.stat-big span{font-size:14px;font-weight:400;color:var(--gray);}
+.stat-compare-row{font-size:12px;color:var(--gray);margin-top:6px;}
+.stat-compare-row strong{color:var(--navy);}
+
+/* Husstand card */
+.husstand-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:10px;}
+.husstand-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;cursor:pointer;}
+.husstand-hdr-lbl{font-size:13px;font-weight:700;color:var(--navy);}
+.husstand-chev{transition:transform .3s;color:var(--dgray);}
+.husstand-chev.open{transform:rotate(180deg);}
+.husstand-body{display:none;padding:0 18px 18px;border-top:1px solid var(--lgray);}
+.husstand-body.open{display:block;}
+.husstand-disabled-msg{font-size:12px;color:var(--dgray);padding:14px 18px;text-align:center;}
+.husstand-compare-row{display:flex;gap:12px;margin-top:12px;}
+.husstand-col{flex:1;background:var(--lb);border-radius:14px;padding:14px;text-align:center;}
+.husstand-col-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--gray);margin-bottom:6px;}
+.husstand-col-val{font-size:24px;font-weight:700;color:var(--navy);}
+.husstand-col-unit{font-size:11px;color:var(--gray);}
+.husstand-desc{font-size:12px;color:var(--gray);margin-top:12px;line-height:1.55;}
+.maaned-stats{padding:14px 16px 0;}
+
+/* ─────── DAGSOVERBLIK POPUP ─────── */
+.popup-overlay{position:fixed;inset:0;background:rgba(10,24,40,.48);z-index:200;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px);}
 .popup-overlay.open{display:flex;}
-.popup-sheet{background:#fff;border-radius:24px 24px 0 0;width:393px;max-width:100vw;max-height:90vh;overflow-y:auto;padding:12px 20px 40px;transform:translateY(100%);transition:transform .35s ease;}
+.popup-sheet{background:#fff;border-radius:26px 26px 0 0;width:393px;max-width:100vw;max-height:88vh;overflow-y:auto;padding:12px 20px 44px;transform:translateY(100%);transition:transform .38s cubic-bezier(.34,1.1,.64,1);}
 .popup-overlay.open .popup-sheet{transform:translateY(0);}
-.sheet-handle{width:36px;height:4px;background:var(--lgray);border-radius:2px;margin:0 auto 14px;}
-.dag-date-ttl{font-size:20px;font-weight:700;color:var(--navy);}
-.dag-sub{font-size:12px;color:var(--gray);margin-bottom:12px;}
-.sep-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--dgray);padding:6px 0 5px;border-bottom:1px solid var(--lgray);margin-bottom:8px;}
-.enhed-row{display:flex;flex-direction:column;margin-bottom:9px;}
-.enhed-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
-.enhed-left{display:flex;align-items:center;gap:10px;}
-.enhed-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;}
-.enhed-name{font-size:14px;color:var(--navy);font-weight:500;}
-.enhed-liter{font-size:17px;font-weight:700;color:var(--navy);}
-.enhed-liter span{font-size:12px;font-weight:400;}
-.enhed-bar-wrap{background:var(--lgray);border-radius:4px;height:7px;width:100%;overflow:hidden;}
-.enhed-bar{height:100%;border-radius:4px;background:var(--navy);}
-.enhed-pct{text-align:right;font-size:10px;color:var(--dgray);margin-top:1px;}
+.sheet-handle{width:38px;height:4px;background:var(--lgray);border-radius:2px;margin:0 auto 16px;}
+.dag-ttl{font-size:21px;font-weight:700;color:var(--navy);}
+.dag-sub{font-size:12px;color:var(--gray);margin-bottom:14px;}
+.sep-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.3px;color:var(--dgray);padding:8px 0 5px;border-bottom:1px solid var(--lgray);margin-bottom:8px;}
+.enhed-row{margin-bottom:10px;}
+.enhed-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.enhed-left{display:flex;align-items:center;gap:12px;}
+.enhed-ico{width:26px;height:26px;display:flex;align-items:center;justify-content:center;}
+.enhed-nm{font-size:14px;color:var(--navy);font-weight:500;}
+.enhed-lit{font-size:18px;font-weight:700;color:var(--navy);}
+.enhed-lit span{font-size:12px;font-weight:400;color:var(--gray);}
+.bar-wrap{background:var(--lgray);border-radius:6px;height:6px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--blue),var(--navy));}
+.bar-pct{text-align:right;font-size:10px;color:var(--dgray);margin-top:2px;}
 
-/* ─── MÅLSÆTNINGER ─── */
-.btn-opret{display:flex;align-items:center;justify-content:space-between;background:var(--lg);border:none;border-radius:36px;padding:0 14px 0 24px;margin:14px 16px 18px;width:calc(100% - 32px);height:60px;cursor:pointer;font-family:var(--font);box-shadow:0 4px 10px rgba(0,0,0,.1);}
-.btn-opret:active{opacity:.85;}
-.btn-opret-txt{font-size:16px;font-weight:700;color:var(--gd);}
-.goals-lbl{font-size:14px;font-weight:700;color:var(--navy);padding:0 16px 8px;}
-.maal-kort{background:var(--lb);border-radius:20px;padding:16px;margin:0 16px 10px;position:relative;}
-.maal-kort.red-card{background:var(--lr);}
-.maal-kort.gray-card{background:#F3F3F3;}
-.mk-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;}
+/* ─────── MÅLSÆTNINGER ─────── */
+.btn-opret{display:flex;align-items:center;justify-content:space-between;background:#128A00;border:none;border-radius:var(--radius);padding:0 16px 0 22px;margin:0 16px 18px;width:calc(100%-32px);height:64px;cursor:pointer;box-shadow:0 6px 20px rgba(18,138,0,.24);}
+.btn-opret-txt{font-size:16px;font-weight:700;color:#fff;}
+.btn-opret:active{opacity:.88;}
+.goals-lbl{font-size:12px;font-weight:700;color:var(--navy);padding:0 16px 8px;text-transform:uppercase;letter-spacing:.8px;}
+.maal-kort{background:#fff;border-radius:var(--radius);padding:18px;margin:0 16px 10px;position:relative;box-shadow:var(--shadow);}
+@keyframes newGoalPop{0%,100%{box-shadow:var(--shadow);}50%{box-shadow:0 0 0 4px rgba(0,168,224,.3),var(--shadow-lg);}}
+.new-goal-highlight{animation:newGoalPop 1.3s ease 2;}
+.mk-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--blue);margin-bottom:4px;}
+.mk-title-display{font-size:20px;font-weight:700;color:var(--navy);cursor:pointer;padding:4px 0;border-bottom:2px solid transparent;transition:border-color .2s;}
+.mk-title-display:active{border-color:var(--blue);}
+.mk-title-edit-wrap{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.mk-title-input{font-size:20px;font-weight:700;color:var(--navy);border:none;border-bottom:2.5px solid var(--blue);background:transparent;outline:none;width:100%;padding:4px 0;font-family:var(--font);}
+.mk-save-btn{width:36px;height:36px;border-radius:50%;background:var(--gd);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mk-sub{font-size:12px;color:var(--gray);margin-bottom:8px;}
+.mk-desc{font-size:12px;color:var(--gray);font-style:italic;margin-top:4px;}
+.mk-desc-inp{width:100%;border:1.5px solid var(--blue);border-radius:12px;padding:10px 14px;font-size:14px;color:var(--navy);margin-top:8px;background:#F8FCFF;outline:none;display:none;font-family:var(--font);}
+.mk-desc-inp.open{display:block;}
+.mk-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;}
 .mk-left{flex:1;}
-.mk-title{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:2px;}
-.mk-date{font-size:11px;color:var(--gray);}
-.mk-right{display:flex;flex-direction:column;align-items:center;gap:8px;margin-left:10px;}
-.btn-dots-goal{background:rgba(13,47,79,.07);border:none;border-radius:20px;padding:5px 12px;font-size:17px;letter-spacing:2px;color:var(--navy);cursor:pointer;font-family:var(--font);font-weight:700;line-height:1;}
-.dots-menu{position:absolute;right:12px;top:46px;background:#fff;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.15);z-index:50;min-width:180px;overflow:hidden;border:1px solid rgba(0,0,0,.06);}
-.dots-item{display:block;width:100%;padding:13px 18px;background:none;border:none;font-family:var(--font);font-size:14px;font-weight:500;color:var(--navy);cursor:pointer;text-align:left;border-bottom:1px solid rgba(0,0,0,.05);}
+.mk-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-left:10px;}
+.dots-btn{background:var(--lgray);border:none;border-radius:20px;padding:5px 13px;font-size:18px;letter-spacing:2px;color:var(--navy);cursor:pointer;font-weight:700;line-height:1;}
+.dots-menu{position:absolute;right:14px;top:48px;background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.14);z-index:50;min-width:190px;overflow:hidden;border:1px solid rgba(0,0,0,.05);}
+.dots-item{display:block;width:100%;padding:14px 18px;background:none;border:none;font-size:14px;font-weight:500;color:var(--navy);cursor:pointer;text-align:left;border-bottom:1px solid rgba(0,0,0,.05);font-family:var(--font);}
 .dots-item:last-child{border-bottom:none;}
 .dots-item.del{color:var(--red);}
 .dots-item:active{background:var(--lb);}
-.maal-metrics{display:flex;margin:8px 0;}
-.maal-metric{flex:1;text-align:center;padding:6px 4px;border-right:1px solid rgba(13,47,79,.1);}
+.maal-metrics{display:flex;margin:10px 0 0;background:var(--lb);border-radius:14px;overflow:hidden;}
+.maal-metric{flex:1;text-align:center;padding:10px 4px;border-right:1px solid rgba(13,47,79,.07);}
 .maal-metric:last-child{border-right:none;}
 .mm-val{font-size:18px;font-weight:700;color:var(--navy);line-height:1;}
-.mm-unit{font-size:10px;color:var(--navy);opacity:.6;margin-top:2px;}
-.mk-exceeded{font-size:11px;color:var(--red);font-weight:600;margin-top:8px;padding-top:8px;border-top:1px solid rgba(204,0,0,.15);}
-.btn-genaktiver{background:#fff;border:1.5px solid var(--navy);border-radius:20px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--navy);cursor:pointer;font-family:var(--font);}
+.mm-unit{font-size:10px;color:var(--gray);margin-top:2px;}
 
-/* ─── OPRET MÅL ─── */
-.forslag-card{background:var(--lb);border-radius:16px;padding:14px 18px;margin:0 16px 10px;cursor:pointer;}
-.forslag-card h4{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:3px;}
-.forslag-card p{font-size:12px;color:var(--navy);line-height:1.4;opacity:.8;}
-.eget-section{margin:14px 16px;background:#F3F3F3;border-radius:16px;padding:18px;}
-.input-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
-.input-row input{flex:1;border:1.5px solid var(--lgray);border-radius:12px;padding:10px 14px;font-size:15px;font-family:var(--font);background:#fff;color:var(--navy);}
+/* Tidligere mål */
+.prev-wrap{margin:0 16px 16px;}
+.prev-toggle{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#fff;border-radius:var(--radius);cursor:pointer;border:none;width:100%;box-shadow:var(--shadow);}
+.prev-toggle span{font-size:14px;font-weight:700;color:var(--navy);}
+.prev-chev{transition:transform .25s;color:var(--dgray);font-size:18px;}
+.prev-chev.open{transform:rotate(180deg);}
+.prev-list{display:none;padding-top:8px;}
+.prev-list.open{display:block;}
+.prev-card{background:#fff;border-radius:16px;padding:14px 16px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.05);cursor:pointer;}
+.prev-card-title{font-size:13px;font-weight:700;color:var(--navy);}
+.prev-card-sub{font-size:11px;color:var(--dgray);margin-top:2px;}
+.prev-card-tag{display:inline-flex;align-items:center;gap:4px;background:var(--lg);color:var(--gd);font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;margin-top:6px;}
 
-/* ─── LÆR MERE ─── */
-.laer-list{display:flex;flex-direction:column;gap:10px;padding:0 16px 16px;}
-.laer-row{background:#fff;border-radius:18px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border:1.5px solid var(--navy);}
-.laer-row:active{background:var(--lb);}
-.laer-row-left{display:flex;align-items:center;gap:14px;}
-.laer-row-name{font-size:15px;font-weight:600;color:var(--navy);}
+/* Prev goal detail sheet */
+.prev-detail-overlay{position:fixed;inset:0;background:rgba(10,24,40,.48);z-index:300;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px);}
+.prev-detail-overlay.open{display:flex;}
+.prev-detail-sheet{background:#fff;border-radius:26px 26px 0 0;width:393px;max-width:100vw;padding:16px 22px 48px;transform:translateY(100%);transition:transform .38s cubic-bezier(.34,1.1,.64,1);}
+.prev-detail-overlay.open .prev-detail-sheet{transform:translateY(0);}
 
-/* ─── ENHED DETALJE ─── */
-.enhed-detail-hdr{display:flex;flex-direction:column;align-items:center;padding:6px 20px 16px;}
-.enhed-big-icon{display:flex;align-items:center;justify-content:center;width:80px;height:80px;margin-bottom:8px;}
-.enhed-detail-ttl{font-size:20px;font-weight:700;color:var(--navy);}
-.fact-card{background:var(--lb);border-radius:20px;padding:22px 20px;margin:0 16px;min-height:190px;display:flex;flex-direction:column;}
-.fact-card.hidden{display:none;}
-.fact-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue);margin-bottom:8px;}
-.fact-title{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:10px;line-height:1.3;}
-.fact-text{font-size:13px;color:var(--navy);line-height:1.6;flex:1;}
-.fact-footer{margin-top:14px;display:flex;align-items:center;justify-content:space-between;}
-.fact-dots{display:flex;gap:6px;}
-.fact-dot{width:7px;height:7px;border-radius:50%;background:var(--lgray);}
-.fact-dot.active{background:var(--navy);}
-.btn-next{background:var(--navy);color:#fff;border:none;border-radius:30px;padding:9px 18px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;}
+/* ─────── OPRET MÅL ─────── */
+.eget-section{margin:10px 16px;background:#fff;border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);}
+.input-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.input-row input{flex:1;border:1.5px solid var(--lgray);border-radius:14px;padding:12px 16px;font-size:16px;background:#fff;color:var(--navy);outline:none;font-family:var(--font);}
+.input-row input:focus{border-color:var(--blue);}
 
-/* ─── BADGES PAGE ─── */
+/* ─────── BADGES ─────── */
+.badges-page-hdr{padding:0 20px 12px;}
+.badges-page-ttl{font-size:22px;font-weight:700;color:var(--navy);margin-bottom:4px;}
+.badges-page-sub{font-size:13px;color:var(--gray);}
 .badges-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:4px 16px 16px;}
-.badge-card{border-radius:18px;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;}
-.badge-card.active-badge{background:var(--lb);}
-.badge-card.inactive-badge{background:#F0F0F0;}
+.badge-card{border-radius:20px;padding:18px 12px 14px;display:flex;flex-direction:column;align-items:center;cursor:pointer;}
+.badge-card:active{transform:scale(.96);}
+.badge-inactive{background:#F2F4F6;}
 
-/* ─── BADGE UNLOCK POPUP (confetti) ─── */
-.badge-unlock-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;align-items:center;justify-content:center;padding:30px;}
+/* Badge unlock */
+.badge-unlock-overlay{position:fixed;inset:0;background:rgba(10,24,40,.58);z-index:800;display:none;align-items:center;justify-content:center;padding:28px;backdrop-filter:blur(4px);}
 .badge-unlock-overlay.open{display:flex;}
-.badge-unlock-box{background:#fff;border-radius:28px;padding:32px 24px;width:100%;max-width:320px;text-align:center;position:relative;overflow:hidden;}
-.bub-title{font-size:22px;font-weight:700;color:var(--navy);margin:14px 0 6px;}
-.bub-sub{font-size:14px;color:var(--gray);margin-bottom:20px;}
-.confetti-piece{position:absolute;width:8px;height:8px;border-radius:2px;animation:fall 2.5s ease-in forwards;}
-@keyframes fall{0%{transform:translateY(-20px) rotate(0);opacity:1;}100%{transform:translateY(320px) rotate(720deg);opacity:0;}}
+.badge-unlock-box{background:#fff;border-radius:28px;padding:32px 24px 28px;width:100%;max-width:310px;text-align:center;position:relative;box-shadow:0 24px 64px rgba(0,0,0,.22);}
+.bub-eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:var(--blue);margin-bottom:10px;}
+.bub-ttl{font-size:22px;font-weight:700;color:var(--navy);margin:0 0 10px;line-height:1.25;}
+.bub-sub{display:none;}
+.bub-reason{font-size:13px;color:var(--gray);margin-bottom:24px;line-height:1.6;padding:0 4px;}
+/* confetti lives on the OVERLAY, not inside the box */
+.confetti-p{position:fixed;border-radius:3px;animation:fall 2.8s ease-in forwards;z-index:801;pointer-events:none;}
+@keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1;}100%{transform:translateY(105vh) rotate(760deg);opacity:0;}}
 
-/* ─── BADGE INFO POPUP ─── */
-.badge-popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:250;display:none;align-items:flex-end;justify-content:center;}
-.badge-popup-overlay.open{display:flex;}
-.badge-popup-sheet{background:#fff;border-radius:24px 24px 0 0;width:393px;max-width:100vw;padding:16px 24px 48px;transform:translateY(100%);transition:transform .35s ease;}
-.badge-popup-overlay.open .badge-popup-sheet{transform:translateY(0);}
+/* Badge info */
+.badge-info-overlay{position:fixed;inset:0;background:rgba(10,24,40,.45);z-index:250;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px);}
+.badge-info-overlay.open{display:flex;}
+.badge-info-sheet{background:#fff;border-radius:26px 26px 0 0;width:393px;max-width:100vw;padding:16px 24px 52px;transform:translateY(100%);transition:transform .38s cubic-bezier(.34,1.1,.64,1);}
+.badge-info-overlay.open .badge-info-sheet{transform:translateY(0);}
 .bps-icon{display:flex;justify-content:center;margin-bottom:12px;}
-.bps-name{font-size:19px;font-weight:700;color:var(--navy);text-align:center;margin-bottom:6px;}
-.bps-status{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;margin:0 auto 14px;width:fit-content;}
+.bps-name{font-size:20px;font-weight:700;color:var(--navy);text-align:center;margin-bottom:8px;}
+.bps-status{display:block;font-size:12px;font-weight:600;padding:4px 14px;border-radius:20px;margin:0 auto 14px;width:fit-content;}
 .bps-status.earned{background:var(--lg);color:var(--gd);}
-.bps-status.locked{background:#F0F0F0;color:var(--dgray);}
-.bps-how{font-size:13px;color:var(--navy);line-height:1.6;text-align:center;}
+.bps-status.locked{background:#F2F4F6;color:var(--dgray);}
+.bps-how{font-size:13px;color:var(--gray);line-height:1.65;text-align:center;}
 
-/* ─── INAKTIV POPUP ─── */
-.ep-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:none;align-items:flex-end;justify-content:center;}
-.ep-overlay.open{display:flex;}
-.ep-sheet{background:#fff;border-radius:24px 24px 0 0;width:393px;max-width:100vw;padding:24px 20px 44px;transform:translateY(100%);transition:transform .35s ease;}
-.ep-overlay.open .ep-sheet{transform:translateY(0);}
-.ep-handle{width:36px;height:4px;background:var(--lgray);border-radius:2px;margin:0 auto 20px;}
-
-/* ─── CONFIRM DELETE ─── */
-.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;display:none;align-items:center;justify-content:center;padding:20px;}
+/* Confirm */
+.confirm-overlay{position:fixed;inset:0;background:rgba(10,24,40,.52);z-index:600;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
 .confirm-overlay.open{display:flex;}
-.confirm-box{background:#fff;border-radius:24px;padding:28px 24px;width:100%;max-width:340px;}
-.confirm-icon{font-size:36px;text-align:center;margin-bottom:12px;}
-.confirm-title{font-size:18px;font-weight:700;color:var(--navy);text-align:center;margin-bottom:8px;}
-.confirm-msg{font-size:13px;color:var(--gray);text-align:center;margin-bottom:24px;line-height:1.5;}
+.confirm-box{background:#fff;border-radius:26px;padding:28px 24px;width:100%;max-width:340px;box-shadow:var(--shadow-lg);}
+.confirm-ico{font-size:34px;text-align:center;margin-bottom:12px;}
+.confirm-ttl{font-size:19px;font-weight:700;color:var(--navy);text-align:center;margin-bottom:8px;}
+.confirm-msg{font-size:13px;color:var(--gray);text-align:center;margin-bottom:24px;line-height:1.55;}
 .confirm-btns{display:flex;gap:10px;}
-.confirm-btns button{flex:1;padding:13px;border-radius:20px;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;border:none;}
+.confirm-btns button{flex:1;padding:13px;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:var(--font);}
 .confirm-cancel{background:var(--lb);color:var(--navy);}
 .confirm-del{background:var(--red);color:#fff;}
 </style>
 </head>
 <body>
-<div class="pw">
+<div class="pw" id="app">
 
-<!-- ======== STARTSIDE ======== -->
+<!-- ════════ STARTSIDE ════════ -->
 <div id="home-screen" class="screen active">
  <div class="sc">
   <div class="top-header">
-   <div>
-    <div style="font-size:18px;color:var(--navy)">Velkommen,</div>
-    <div style="font-size:30px;font-weight:700;color:var(--navy)">Christian!</div>
-   </div>
-   <svg width="72" height="105" viewBox="0 0 101 151" fill="none">
-    <g filter="url(#fm)"><path d="M10.75 95C18.37 59 44.9 50 50.64 10C57.26 50 83.31 60 90.33 95C95.24 120 72.39 141 50.64 141C28.83 141 5.49 120 10.75 95Z" fill="#00A7E1" fill-opacity=".13"/></g>
-    <path d="M15 95C22 62 45.5 54 50.62 17C56.53 53 79.77 62 86 95C90.4 117 70 136 50.62 136C31 136 10.3 117 15 95Z" fill="#00A7E1"/>
-    <ellipse cx="43" cy="77" rx="3.1" ry="5.3" fill="#000"/><ellipse cx="58" cy="77" rx="3.1" ry="5.3" fill="#000"/>
-    <ellipse cx="41.5" cy="76.5" rx="1.4" ry="2.4" fill="#fff"/><ellipse cx="56.5" cy="76.5" rx="1.4" ry="2.4" fill="#fff"/>
-    <defs><filter id="fm"><feGaussianBlur stdDeviation="5"/></filter></defs>
-   </svg>
+   <div class="greeting-word" id="greeting-word">Godmorgen</div>
+   <div class="dropus-inline" onclick="handleDropusRestTap()">
+ <svg viewBox="0 0 101 151" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M16 95C22 63 45 55 50.6 18C56.5 54 79 63 85 95C89 116 69 135 50.6 135C32 135 11 116 16 95Z" fill="#00A8E0"/>
+  <ellipse cx="37" cy="58" rx="5.5" ry="9" fill="rgba(255,255,255,.22)" transform="rotate(-18 37 58)"/>
+  <ellipse cx="43" cy="78" rx="3.4" ry="5.8" fill="#fff"/>
+  <ellipse cx="58" cy="78" rx="3.4" ry="5.8" fill="#fff"/>
+  <ellipse cx="42.2" cy="77" rx="1.9" ry="3.4" fill="#1a3a5c"/>
+  <ellipse cx="57.2" cy="77" rx="1.9" ry="3.4" fill="#1a3a5c"/>
+  <ellipse cx="43" cy="75.5" rx=".75" ry="1.2" fill="#fff"/>
+  <ellipse cx="58" cy="75.5" rx=".75" ry="1.2" fill="#fff"/>
+  <path d="M44 91 Q50.5 95 57 91" stroke="#1a3a5c" stroke-width="2" stroke-linecap="round" fill="none"/>
+ </svg>
+</div>
   </div>
-
-  <!-- Streak boks -->
-  <div class="streak-card" onclick="showScreen('goals-screen')">
-   <div class="streak-left">
-    <h3>Du holder dit mål</h3>
-    <div class="streak-goal">Ugentligt forbrug under 1.750 l/uge</div>
+  <div class="streak-card" id="streak-card" onclick="showScreen('goals-screen')">
+   <div>
+    <div class="streak-lbl" id="streak-lbl">Du holder dit mål</div>
+    <div class="streak-sub" id="streak-sub">Ugentligt forbrug under 1.750 l/uge</div>
     <div class="streak-status">
-     <div class="streak-check"><svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
-     <span>Mål overholdt</span>
+     <div class="streak-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+     <span class="streak-ok" id="streak-ok-txt">Mål overholdt</span>
     </div>
    </div>
-   <svg width="44" height="58" viewBox="0 0 50 66" fill="none">
-    <defs><filter id="ds0"><feDropShadow dx="0" dy="3" stdDeviation="2" flood-color="rgba(0,0,0,.2)"/></filter></defs>
-    <path d="M4.4 38C8.3 21.5 22 17.8 25 0C28.5 17.4 42 21.8 45.6 38C48.2 49 36.4 58 25 58C13.8 58 1.7 49 4.4 38Z" fill="#128A00" filter="url(#ds0)"/>
-    <text x="25" y="33" text-anchor="middle" font-family="Helvetica Neue,Arial,sans-serif" font-size="17" font-weight="700" fill="white">3</text>
-    <text x="25" y="46" text-anchor="middle" font-family="Helvetica Neue,Arial,sans-serif" font-size="9" fill="white">uger</text>
-   </svg>
+   <div id="home-streak-drop"></div>
   </div>
-
-  <!-- Din uge -->
-  <div class="sec-ttl">Din uge</div>
+  <div class="sec-ttl" style="margin-top:10px;">Denne uge</div>
   <div class="uge-card" id="uge-card" onclick="handleUgeClick(event)"></div>
-
-  <!-- Spare-tekst + i-ikon (inline) -->
   <div class="spare-row">
-   <span class="spare-tekst" id="spare-tekst"></span>
-   <button class="info-btn" onclick="toggleInfoBubble()" aria-label="Forklaring">
-    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-     <circle cx="10" cy="10" r="9" stroke="#0D2F4F" stroke-width="1.5"/>
-     <text x="10" y="15" text-anchor="middle" font-family="Helvetica Neue,Arial,sans-serif" font-size="12" font-weight="700" fill="#0D2F4F">i</text>
-    </svg>
+   <span class="spare-txt" id="spare-txt"></span>
+   <button class="info-btn" onclick="toggleInfo()">
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="#0D2F4F" stroke-width="1.5"/><text x="10" y="15" text-anchor="middle" font-family="Helvetica Neue,Arial,sans-serif" font-size="12" font-weight="700" fill="#0D2F4F">i</text></svg>
    </button>
   </div>
   <div class="info-bubble" id="info-bubble"></div>
-
-  <!-- Mit mål -->
-  <div class="sec-ttl" style="padding-top:14px;">Mit mål</div>
-  <div class="mit-maal" onclick="showScreen('goals-screen')">
-   <div class="mm-top">
-    <div class="mm-info">
-     <div class="mm-date" id="maal-daterange"></div>
-     <div class="mm-title">Maks 1.750 l vand om ugen</div>
-     <div class="prog-wrap"><div class="prog-fill" id="home-prog"></div></div>
-    </div>
-    <svg width="40" height="54" viewBox="0 0 50 66" fill="none" style="flex-shrink:0;margin-top:2px">
-     <defs><filter id="ds1"><feDropShadow dx="0" dy="3" stdDeviation="2" flood-color="rgba(0,0,0,.2)"/></filter></defs>
-     <path d="M4.4 38C8.3 21.5 22 17.8 25 0C28.5 17.4 42 21.8 45.6 38C48.2 49 36.4 58 25 58C13.8 58 1.7 49 4.4 38Z" fill="#128A00" filter="url(#ds1)"/>
-     <text x="25" y="33" text-anchor="middle" font-family="Helvetica Neue,Arial,sans-serif" font-size="15" font-weight="700" fill="white">3</text>
-     <text x="25" y="46" text-anchor="middle" font-family="Helvetica Neue,Arial,sans-serif" font-size="9" fill="white">uger</text>
-    </svg>
-   </div>
-   <div class="metrics-row" id="home-metrics"></div>
-  </div>
+  <div class="sec-ttl" style="margin-top:12px;">Aktivt mål</div>
+  <div class="maal-card" id="home-maal-card" onclick="showScreen('goals-screen')"></div>
   <button class="btn-under" onclick="showScreen('goals-screen')">Gå til målsætninger</button>
-
-  <!-- Mine badges -->
-  <div class="sec-ttl" style="padding-top:4px;">Mine badges</div>
-  <div class="badges-sect">
-   <div class="badges-row">
-    <div class="badge-item" onclick="showScreen('badges-screen')">
-     <svg width="96" height="96" viewBox="0 0 118 118" fill="none"><rect x="4" width="110" height="110" rx="10" fill="#E3F8FF"/><path d="M54.46 18.4L44.73 2.19C44.33 1.52 43.77.97 43.09.58 42.41.2 41.65 0 40.87 0H25.23C23.4 0 22.34 2.05 23.38 3.54L39.04 25.92C43.22 22.01 48.54 19.32 54.46 18.4ZM92.77 0H77.13C75.55 0 74.08.83 73.27 2.19L63.54 18.4C69.46 19.32 74.78 22.01 78.96 25.91L94.62 3.54C95.66 2.05 94.6 0 92.77 0ZM59 22.52C45.32 22.52 34.23 33.61 34.23 47.29 34.23 60.97 45.32 72.06 59 72.06 72.68 72.06 83.77 60.97 83.77 47.29 83.77 33.61 72.68 22.52 59 22.52ZM72.02 44.65L66.68 49.85 67.95 57.2C68.17 58.52 66.78 59.53 65.6 58.9L59 55.43 52.4 58.9C51.22 59.53 49.83 58.52 50.06 57.2L51.32 49.85 45.98 44.65C45.02 43.72 45.55 42.09 46.87 41.89L54.25 40.82 57.55 34.13C57.85 33.53 58.42 33.23 59 33.23 59.58 33.23 60.15 33.53 60.45 34.13L63.75 40.82 71.13 41.89C72.45 42.09 72.98 43.72 72.02 44.65Z" fill="#128A00"/><text x="59" y="95" text-anchor="middle" font-family="Helvetica Neue,Arial,sans-serif" font-size="11" font-weight="700" fill="#128A00">Den ambitiøse</text></svg>
-    </div>
-    <div class="badge-item" onclick="showScreen('badges-screen')">
-     <svg width="96" height="96" viewBox="0 0 118 118" fill="none"><rect x="4" width="110" height="110" rx="10" fill="#E3F8FF"/><path d="M54.46 18.4L44.73 2.19C44.33 1.52 43.77.97 43.09.58 42.41.2 41.65 0 40.87 0H25.23C23.4 0 22.34 2.05 23.38 3.54L39.04 25.92C43.22 22.01 48.54 19.32 54.46 18.4ZM92.77 0H77.13C75.55 0 74.08.83 73.27 2.19L63.54 18.4C69.46 19.32 74.78 22.01 78.96 25.91L94.62 3.54C95.66 2.05 94.6 0 92.77 0ZM59 22.52C45.32 22.52 34.23 33.61 34.23 47.29 34.23 60.97 45.32 72.06 59 72.06 72.68 72.06 83.77 60.97 83.77 47.29 83.77 33.61 72.68 22.52 59 22.52ZM72.02 44.65L66.68 49.85 67.95 57.2C68.17 58.52 66.78 59.53 65.6 58.9L59 55.43 52.4 58.9C51.22 59.53 49.83 58.52 50.06 57.2L51.32 49.85 45.98 44.65C45.02 43.72 45.55 42.09 46.87 41.89L54.25 40.82 57.55 34.13C57.85 33.53 58.42 33.23 59 33.23 59.58 33.23 60.15 33.53 60.45 34.13L63.75 40.82 71.13 41.89C72.45 42.09 72.98 43.72 72.02 44.65Z" fill="#128A00"/><text x="59" y="95" text-anchor="middle" font-family="Helvetica Neue,Arial,sans-serif" font-size="11" font-weight="700" fill="#128A00">Den vedholdende</text></svg>
-    </div>
-   </div>
-  </div>
-  <button class="btn-under" onclick="showScreen('badges-screen')" style="margin-bottom:24px;">Optjen flere badges</button>
+  <div class="sec-ttl" style="margin-top:4px;">Optjente badges</div>
+  <div id="home-badges-sect"></div>
+  <button class="btn-under" onclick="showScreen('badges-screen')" style="margin-bottom:28px;">Se alle badges</button>
  </div>
 </div>
 
-<!-- ======== KALENDER ======== -->
+<!-- ════════ KALENDER ════════ -->
 <div id="calendar-screen" class="screen">
  <div class="sc">
   <div class="sh">
-   <button class="back-btn" onclick="showScreen('home-screen')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#0D2F4F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+   <button class="back-btn" onclick="goBack()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#0D2F4F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
    <h2>Dit vandforbrug</h2>
-   <svg class="sh-mascot" viewBox="0 0 101 151" fill="none"><path d="M15 95C22 62 45.5 54 50.62 17C56.53 53 79.77 62 86 95C90.4 117 70 136 50.62 136C31 136 10.3 117 15 95Z" fill="#00A7E1"/><ellipse cx="43" cy="77" rx="3.1" ry="5.3" fill="#000"/><ellipse cx="58" cy="77" rx="3.1" ry="5.3" fill="#000"/><ellipse cx="41.5" cy="76.5" rx="1.4" ry="2.4" fill="#fff"/><ellipse cx="56.5" cy="76.5" rx="1.4" ry="2.4" fill="#fff"/></svg>
+   <div class="dropus-inline" onclick="handleDropusRestTap()">
+ <svg viewBox="0 0 101 151" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M16 95C22 63 45 55 50.6 18C56.5 54 79 63 85 95C89 116 69 135 50.6 135C32 135 11 116 16 95Z" fill="#00A8E0"/>
+  <ellipse cx="37" cy="58" rx="5.5" ry="9" fill="rgba(255,255,255,.22)" transform="rotate(-18 37 58)"/>
+  <ellipse cx="43" cy="78" rx="3.4" ry="5.8" fill="#fff"/>
+  <ellipse cx="58" cy="78" rx="3.4" ry="5.8" fill="#fff"/>
+  <ellipse cx="42.2" cy="77" rx="1.9" ry="3.4" fill="#1a3a5c"/>
+  <ellipse cx="57.2" cy="77" rx="1.9" ry="3.4" fill="#1a3a5c"/>
+  <ellipse cx="43" cy="75.5" rx=".75" ry="1.2" fill="#fff"/>
+  <ellipse cx="58" cy="75.5" rx=".75" ry="1.2" fill="#fff"/>
+  <path d="M44 91 Q50.5 95 57 91" stroke="#1a3a5c" stroke-width="2" stroke-linecap="round" fill="none"/>
+ </svg>
+</div>
   </div>
-  <!-- Gap so tip box clears mascot -->
-  <div style="height:14px;"></div>
-  <div class="today-tip"><p id="today-tip-p"></p></div>
-  <div class="month-nav">
-   <button class="month-arrow" id="prev-month" onclick="changeMonth(-1)">‹</button>
-   <h3 id="month-label" style="font-size:17px;"></h3>
-   <button class="month-arrow" id="next-month" onclick="changeMonth(1)">›</button>
+  <div style="height:8px;"></div>
+
+  <!-- Top toggle: Kalender vs Graf -->
+  <div style="display:flex;background:var(--lgray);border-radius:14px;padding:3px;margin:0 16px 14px;">
+   <button class="view-toggle-btn active" id="vt-cal" onclick="setView('cal')">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="display:inline;vertical-align:middle;margin-right:4px;"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    Kalender
+   </button>
+   <button class="view-toggle-btn" id="vt-graf" onclick="setView('graf')">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="display:inline;vertical-align:middle;margin-right:4px;"><rect x="2" y="14" width="4" height="8" rx="1" fill="currentColor"/><rect x="10" y="8" width="4" height="14" rx="1" fill="currentColor"/><rect x="18" y="4" width="4" height="18" rx="1" fill="currentColor"/></svg>
+    Graf
+   </button>
   </div>
-  <div class="cal-grid">
-   <div class="cal-weekdays"><div class="cal-wday">Man</div><div class="cal-wday">Tirs</div><div class="cal-wday">Ons</div><div class="cal-wday">Tors</div><div class="cal-wday">Fre</div><div class="cal-wday">Lør</div><div class="cal-wday">Søn</div></div>
-   <div class="cal-days" id="cal-days"></div>
+
+  <!-- Month nav row (shown in both views) -->
+  <div class="month-nav-row" id="month-nav-row">
+   <button class="month-arrow" id="prev-nav" onclick="navBack()">‹</button>
+   <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
+    <span class="month-lbl" id="month-lbl"></span>
+    <button class="cal-icon-btn" id="cal-picker-btn" onclick="toggleScrollPicker()">
+     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="#0D2F4F" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke="#0D2F4F" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+   </div>
+   <button class="month-arrow" id="next-nav" onclick="navForward()">›</button>
   </div>
+
+  <!-- Graf sub-toggle: Dag / Uge / Måned (only visible in graf view) -->
+  <div id="graf-period-row" style="display:none;padding:0 16px 12px;">
+   <div style="display:flex;background:var(--lgray);border-radius:12px;padding:3px;">
+    <button class="period-btn active" id="pb-day" onclick="setPeriod('day')">Dag</button>
+    <button class="period-btn" id="pb-week" onclick="setPeriod('week')">Uge</button>
+    <button class="period-btn" id="pb-month" onclick="setPeriod('month')">Måned</button>
+   </div>
+  </div>
+
+  <!-- Inline scroll picker -->
+  <div class="scroll-picker-wrap" id="scroll-picker">
+   <div class="scroll-picker-inner">
+    <div class="scroll-col" id="sp-month-col"></div>
+    <div class="scroll-picker-divider" style="display:none;"></div>
+    <div class="scroll-col" id="sp-year-col" style="display:none;"></div>
+   </div>
+  </div>
+
+  <!-- Calendar grid view -->
+  <div class="cal-grid-wrap" id="cal-grid-wrap">
+   <div class="cal-grid">
+    <div class="cal-weekdays">
+     <div class="cal-wday">Man</div><div class="cal-wday">Tirs</div><div class="cal-wday">Ons</div>
+     <div class="cal-wday">Tors</div><div class="cal-wday">Fre</div><div class="cal-wday">Lør</div><div class="cal-wday">Søn</div>
+    </div>
+    <div class="cal-days" id="cal-days"></div>
+   </div>
+  </div>
+
+  <!-- Bar chart area (graf view) -->
+  <div class="chart-area" id="chart-area">
+   <canvas id="bar-canvas" style="width:100%;display:block;"></canvas>
+  </div>
+
   <div class="maaned-stats">
-   <div class="maaned-card" id="cur-month-card"></div>
-   <div class="maaned-card" id="prev-month-card"></div>
+   <div class="stat-card" id="stat-cur"></div>
+   <!-- Husstand -->
+   <div class="husstand-card" id="husstand-card">
+    <div class="husstand-hdr" id="husstand-hdr-div">
+     <span class="husstand-hdr-lbl">Sammenlign med lignende husstand</span>
+     <svg class="husstand-chev" id="husstand-chev" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#9BA8B5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="husstand-body" id="husstand-body"></div>
+   </div>
   </div>
+  <div style="height:8px;"></div>
  </div>
 </div>
 
-<!-- ======== MÅLSÆTNINGER ======== -->
+<!-- ════════ MÅLSÆTNINGER ════════ -->
 <div id="goals-screen" class="screen">
  <div class="sc">
   <div class="sh">
    <button class="back-btn" onclick="showScreen('home-screen')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#0D2F4F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
    <h2>Målsætninger</h2>
-   <svg class="sh-mascot" viewBox="0 0 101 151" fill="none"><path d="M15 95C22 62 45.5 54 50.62 17C56.53 53 79.77 62 86 95C90.4 117 70 136 50.62 136C31 136 10.3 117 15 95Z" fill="#00A7E1"/><ellipse cx="43" cy="77" rx="3.1" ry="5.3" fill="#000"/><ellipse cx="58" cy="77" rx="3.1" ry="5.3" fill="#000"/><ellipse cx="41.5" cy="76.5" rx="1.4" ry="2.4" fill="#fff"/><ellipse cx="56.5" cy="76.5" rx="1.4" ry="2.4" fill="#fff"/></svg>
+   <div class="dropus-inline" onclick="handleDropusRestTap()">
+ <svg viewBox="0 0 101 151" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M16 95C22 63 45 55 50.6 18C56.5 54 79 63 85 95C89 116 69 135 50.6 135C32 135 11 116 16 95Z" fill="#00A8E0"/>
+  <ellipse cx="37" cy="58" rx="5.5" ry="9" fill="rgba(255,255,255,.22)" transform="rotate(-18 37 58)"/>
+  <ellipse cx="43" cy="78" rx="3.4" ry="5.8" fill="#fff"/>
+  <ellipse cx="58" cy="78" rx="3.4" ry="5.8" fill="#fff"/>
+  <ellipse cx="42.2" cy="77" rx="1.9" ry="3.4" fill="#1a3a5c"/>
+  <ellipse cx="57.2" cy="77" rx="1.9" ry="3.4" fill="#1a3a5c"/>
+  <ellipse cx="43" cy="75.5" rx=".75" ry="1.2" fill="#fff"/>
+  <ellipse cx="58" cy="75.5" rx=".75" ry="1.2" fill="#fff"/>
+  <path d="M44 91 Q50.5 95 57 91" stroke="#1a3a5c" stroke-width="2" stroke-linecap="round" fill="none"/>
+ </svg>
+</div>
   </div>
-  <div style="height:14px;"></div>
-  <button class="btn-opret" onclick="showScreen('create-goal-screen')">
+  <div style="height:8px;"></div>
+  <button class="btn-opret" style="width:calc(100% - 32px);" onclick="showScreen('create-goal-screen')">
    <span class="btn-opret-txt">Opret et nyt mål</span>
-   <svg width="46" height="54" viewBox="0 0 52 66" fill="none"><path d="M4.4 38C8.3 21.5 22 17.8 25 0C28.5 17.4 42 21.8 45.6 38C48.2 49 36.4 58 25 58C13.8 58 1.7 49 4.4 38Z" fill="#128A00"/><line x1="25" y1="22" x2="25" y2="44" stroke="white" stroke-width="4" stroke-linecap="round"/><line x1="14" y1="33" x2="36" y2="33" stroke="white" stroke-width="4" stroke-linecap="round"/></svg>
+   <svg width="46" height="46" viewBox="0 0 46 46" fill="none"><circle cx="23" cy="23" r="19" fill="rgba(255,255,255,.18)"/><path d="M23 14v18M14 23h18" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>
   </button>
-  <div class="goals-lbl">Aktive mål</div>
+  <div class="goals-lbl">Aktivt mål</div>
   <div id="active-goals"></div>
-  <div id="inactive-section" style="display:none;">
-   <div class="goals-lbl" style="padding-top:6px;">Inaktive mål</div>
-   <div id="inactive-goals"></div>
+  <div style="height:8px;"></div>
+  <div class="prev-wrap">
+   <button class="prev-toggle" id="prev-toggle-btn" onclick="togglePrev()">
+    <span>Tidligere mål</span>
+    <span class="prev-chev" id="prev-chev">▾</span>
+   </button>
+   <div class="prev-list" id="prev-list"></div>
   </div>
  </div>
 </div>
 
-<!-- ======== OPRET MÅL ======== -->
+<!-- ════════ OPRET MÅL ════════ -->
 <div id="create-goal-screen" class="screen">
  <div class="sc">
-  <div class="sh"><button class="back-btn" onclick="showScreen('goals-screen')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#0D2F4F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h2>Opret et nyt mål</h2></div>
-  <div style="padding:0 20px 14px;font-size:12px;color:var(--gray)">Vælg et af Droppos forslag eller lav dit eget</div>
-  <div style="font-size:13px;font-weight:600;color:var(--navy);padding:0 20px 8px">Droppos forslag</div>
-  <div class="forslag-card" onclick="activateGoal('spar20')"><h4>Spar 20 kr. om ugen</h4><p>Reducer dit forbrug fra 1.750 l til 1.408 l om ugen og spar 20 kr. ugentligt.</p></div>
-  <div class="forslag-card" onclick="activateGoal('reducer10')"><h4>Reducer vandforbrug med 10%</h4><p>Sæt et nyt ugentligt mål på 1.575 l — 10% lavere end dit nuværende mål.</p></div>
-  <div class="eget-section">
-   <h3 style="margin-bottom:6px;">Lav dit eget mål</h3>
-   <p style="font-size:12px;color:var(--gray);margin-bottom:14px;">Sæt dit eget ugentlige maksimumforbrug</p>
-   <div class="input-row"><label>Maks:</label><input type="number" placeholder="f.eks. 1200" min="100" max="5000"><label>l/uge</label></div>
-   <button class="btn-primary" onclick="alert('Under udvikling')">Opret mål</button>
-  </div>
- </div>
-</div>
-
-<!-- ======== LÆR MERE ======== -->
-<div id="learn-screen" class="screen">
- <div class="sc">
   <div class="sh">
-   <button class="back-btn" onclick="showScreen('home-screen')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#0D2F4F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-   <h2>Lær mere om vand</h2>
-   <svg class="sh-mascot" viewBox="0 0 101 151" fill="none"><path d="M15 95C22 62 45.5 54 50.62 17C56.53 53 79.77 62 86 95C90.4 117 70 136 50.62 136C31 136 10.3 117 15 95Z" fill="#00A7E1"/><ellipse cx="43" cy="77" rx="3.1" ry="5.3" fill="#000"/><ellipse cx="58" cy="77" rx="3.1" ry="5.3" fill="#000"/><ellipse cx="41.5" cy="76.5" rx="1.4" ry="2.4" fill="#fff"/><ellipse cx="56.5" cy="76.5" rx="1.4" ry="2.4" fill="#fff"/></svg>
+   <button class="back-btn" onclick="showScreen('goals-screen')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#0D2F4F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+   <h2>Opret et nyt mål</h2>
+   <div class="dropus-inline" onclick="handleDropusRestTap()">
+ <svg viewBox="0 0 101 151" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M16 95C22 63 45 55 50.6 18C56.5 54 79 63 85 95C89 116 69 135 50.6 135C32 135 11 116 16 95Z" fill="#00A8E0"/>
+  <ellipse cx="37" cy="58" rx="5.5" ry="9" fill="rgba(255,255,255,.22)" transform="rotate(-18 37 58)"/>
+  <ellipse cx="43" cy="78" rx="3.4" ry="5.8" fill="#fff"/>
+  <ellipse cx="58" cy="78" rx="3.4" ry="5.8" fill="#fff"/>
+  <ellipse cx="42.2" cy="77" rx="1.9" ry="3.4" fill="#1a3a5c"/>
+  <ellipse cx="57.2" cy="77" rx="1.9" ry="3.4" fill="#1a3a5c"/>
+  <ellipse cx="43" cy="75.5" rx=".75" ry="1.2" fill="#fff"/>
+  <ellipse cx="58" cy="75.5" rx=".75" ry="1.2" fill="#fff"/>
+  <path d="M44 91 Q50.5 95 57 91" stroke="#1a3a5c" stroke-width="2" stroke-linecap="round" fill="none"/>
+ </svg>
+</div>
   </div>
-  <div style="height:14px;"></div>
-  <div class="laer-list" id="laer-list"></div>
+  <div style="padding:0 20px 12px;font-size:13px;color:var(--gray);">Lav dit eget ugentlige mål for vandforbruget</div>
+  <div class="eget-section">
+   <h3 style="margin-bottom:8px;">Lav dit eget mål</h3>
+   <p style="font-size:12px;color:var(--gray);margin-bottom:16px;line-height:1.55;">Sæt dit ugentlige maksimumforbrug. Tip: 1.400 liter om ugen sparer ca. 80 kr. om måneden.</p>
+   <div class="input-row">
+    <label style="font-size:13px;color:var(--gray);font-weight:600;white-space:nowrap;">Maks</label>
+    <input type="number" id="custom-goal-input" placeholder="f.eks. 1400" min="100" max="5000" inputmode="numeric">
+    <label style="font-size:13px;color:var(--gray);font-weight:600;white-space:nowrap;">l/uge</label>
+   </div>
+   <button class="btn-primary" onclick="activateCustomGoal()">Opret mål</button>
+  </div>
  </div>
 </div>
 
-<!-- ======== ENHED DETALJE ======== -->
-<div id="enhed-screen" class="screen">
- <div class="sc">
-  <div class="sh" style="padding-right:20px;">
-   <button class="back-btn" onclick="showScreen('learn-screen')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#0D2F4F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-   <h2 id="enhed-screen-title"></h2>
-  </div>
-  <div class="enhed-detail-hdr">
-   <div class="enhed-big-icon" id="enhed-big-icon"></div>
-   <div class="enhed-detail-ttl" id="enhed-detail-name"></div>
-  </div>
-  <div id="facts-container"></div>
- </div>
-</div>
-
-<!-- ======== BADGES ======== -->
+<!-- ════════ BADGES ════════ -->
 <div id="badges-screen" class="screen">
  <div class="sc">
   <div class="sh">
-   <button class="back-btn" onclick="showScreen('home-screen')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#0D2F4F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-   <h2>Mine badges</h2>
-   <svg class="sh-mascot" viewBox="0 0 101 151" fill="none"><path d="M15 95C22 62 45.5 54 50.62 17C56.53 53 79.77 62 86 95C90.4 117 70 136 50.62 136C31 136 10.3 117 15 95Z" fill="#00A7E1"/><ellipse cx="43" cy="77" rx="3.1" ry="5.3" fill="#000"/><ellipse cx="58" cy="77" rx="3.1" ry="5.3" fill="#000"/><ellipse cx="41.5" cy="76.5" rx="1.4" ry="2.4" fill="#fff"/><ellipse cx="56.5" cy="76.5" rx="1.4" ry="2.4" fill="#fff"/></svg>
+   <button class="back-btn" onclick="goBack()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#0D2F4F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+   <h2>Optjente badges</h2>
+   <div class="dropus-inline" onclick="handleDropusRestTap()">
+ <svg viewBox="0 0 101 151" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M16 95C22 63 45 55 50.6 18C56.5 54 79 63 85 95C89 116 69 135 50.6 135C32 135 11 116 16 95Z" fill="#00A8E0"/>
+  <ellipse cx="37" cy="58" rx="5.5" ry="9" fill="rgba(255,255,255,.22)" transform="rotate(-18 37 58)"/>
+  <ellipse cx="43" cy="78" rx="3.4" ry="5.8" fill="#fff"/>
+  <ellipse cx="58" cy="78" rx="3.4" ry="5.8" fill="#fff"/>
+  <ellipse cx="42.2" cy="77" rx="1.9" ry="3.4" fill="#1a3a5c"/>
+  <ellipse cx="57.2" cy="77" rx="1.9" ry="3.4" fill="#1a3a5c"/>
+  <ellipse cx="43" cy="75.5" rx=".75" ry="1.2" fill="#fff"/>
+  <ellipse cx="58" cy="75.5" rx=".75" ry="1.2" fill="#fff"/>
+  <path d="M44 91 Q50.5 95 57 91" stroke="#1a3a5c" stroke-width="2" stroke-linecap="round" fill="none"/>
+ </svg>
+</div>
   </div>
-  <div style="height:14px;"></div>
+  <div style="padding:0 20px 12px;font-size:13px;color:var(--gray);">Optjen alle regnbuens farver i badges</div>
   <div class="badges-grid" id="badges-grid"></div>
  </div>
 </div>
 
-<!-- TAB BAR -->
+<!-- TAB BAR — profile btn does nothing -->
 <nav class="tab-bar">
- <button class="tab-btn" id="tab-learn" onclick="showScreen('learn-screen')">
-  <svg width="22" height="28" viewBox="0 0 22 30" fill="none"><path d="M14.77 24.88V26.62C14.77 26.89 14.69 27.15 14.54 27.38L13.52 28.88C13.39 29.07 13.21 29.23 13.01 29.34 12.8 29.44 12.57 29.5 12.34 29.5H8.66C8.43 29.5 8.2 29.44 7.99 29.34 7.79 29.23 7.61 29.07 7.48 28.88L6.46 27.38C6.31 27.15 6.23 26.89 6.23 26.62L6.23 24.88H14.77ZM10.47.5C16.01.48 20.5 4.89 20.5 10.31 20.5 12.78 19.57 15.04 18.03 16.76 17.06 17.85 15.58 20.04 14.91 22H6.09C5.42 20.04 3.94 17.85 2.97 16.76 1.43 15.04.5 12.78.5 10.31.5 5.13 4.67.52 10.47.5ZM10.5 3.25C6.55 3.25 3.32 6.41 3.32 10.31 3.32 11.11 3.98 11.75 4.77 11.75 5.57 11.75 6.23 11.12 6.23 10.31 6.23 8.01 8.14 6.13 10.5 6.13 11.3 6.13 11.95 5.49 11.95 4.69 11.95 3.88 11.3 3.25 10.5 3.25Z" stroke="white" stroke-width=".6" fill="none"/></svg>
-  <span class="tab-lbl">Lær mere</span>
- </button>
  <button class="tab-btn active" id="tab-home" onclick="showScreen('home-screen')">
-  <svg width="30" height="26" viewBox="0 0 39 30" fill="none"><path d="M19.5 8.1L7.2 18.19V28.5C7.2 29.1 7.7 29.5 8.3 29.5H15.5V22H23V29.5H30.7C31.3 29.5 31.8 29.1 31.8 28.5V18.19L19.5 8.1Z" stroke="white" stroke-width="1.2" fill="none"/><path d="M38.38 15.08L19.5.5.5 15.1 2.27 17.25 19.5 3.62 36.61 17.25Z" fill="white"/></svg>
+  <div class="tab-icon"><svg width="24" height="22" viewBox="0 0 39 30" fill="none"><path d="M19.5 8.1L7.2 18.19V28.5C7.2 29.1 7.7 29.5 8.3 29.5H15.5V22H23V29.5H30.7C31.3 29.5 31.8 29.1 31.8 28.5V18.19L19.5 8.1Z" stroke="white" stroke-width="1.5" fill="none"/><path d="M38.38 15.08L19.5.5.5 15.1 2.27 17.25 19.5 3.62 36.61 17.25Z" fill="white"/></svg></div>
   <span class="tab-lbl">Hjem</span>
+  <div class="tab-dot"></div>
  </button>
  <button class="tab-btn" id="tab-goals" onclick="showScreen('goals-screen')">
-  <svg width="26" height="26" viewBox="0 0 31 31" fill="none"><path d="M31 15.5C31 24.06 24.06 31 15.5 31 6.94 31 0 24.06 0 15.5 0 6.94 6.94 0 15.5 0 24.06 0 31 6.94 31 15.5Z" fill="white"/><path d="M26.6 15.5C26.6 21.73 21.21 26.53 15.5 26.53 9.79 26.53 4.39 21.73 4.39 15.5 4.39 9.79 8.81 4.48 15.5 4.48 22.35 4.48 26.6 9.79 26.6 15.5ZM5.99 15.5C5.99 20.75 10.25 25.01 15.5 25.01 20.75 25.01 25.01 20.75 25.01 15.5 25.01 10.25 20.75 5.99 15.5 5.99 10.25 5.99 5.99 10.25 5.99 15.5Z" fill="black"/><circle cx="15.75" cy="16.49" r="4.29" fill="black"/><path d="M9.34 22.75C10.02 22.11 10.94 21.73 11.94 21.73H13.58C14.25 22.03 14.98 22.2 15.75 22.2 16.53 22.2 17.26 22.03 17.92 21.73H19.57C21.67 21.73 23.38 23.43 23.38 25.54V26.01C23.38 26.8 22.74 27.44 21.95 27.44H9.56C8.77 27.44 8.13 26.8 8.13 26.01V25.54C8.13 24.73 8.38 23.99 8.8 23.37Z" fill="black"/></svg>
+  <div class="tab-icon"><svg width="24" height="24" viewBox="0 0 31 31" fill="none"><circle cx="15.5" cy="15.5" r="14.5" stroke="white" stroke-width="1.5" fill="none"/><circle cx="15.5" cy="15.5" r="9" stroke="white" stroke-width="1.5" fill="none"/><circle cx="15.5" cy="15.5" r="4" fill="white"/></svg></div>
   <span class="tab-lbl">Målsætninger</span>
+  <div class="tab-dot"></div>
+ </button>
+ <button class="tab-btn" id="tab-profile">
+  <div class="tab-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="white" stroke-width="1.5" fill="none"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg></div>
+  <span class="tab-lbl">Profil</span>
+  <div class="tab-dot"></div>
  </button>
 </nav>
 
@@ -480,20 +628,22 @@ h3{font-size:16px;font-weight:600;color:var(--navy);}
  </div>
 </div>
 
-<!-- BADGE UNLOCK CONFETTI -->
-<div class="badge-unlock-overlay" id="badge-unlock-overlay">
- <div class="badge-unlock-box" id="badge-unlock-box">
-  <div id="bub-confetti"></div>
-  <div id="bub-badge-icon"></div>
-  <div class="bub-title">Badge optjent! 🎉</div>
-  <div class="bub-sub" id="bub-badge-name"></div>
-  <button class="btn-primary" style="margin-top:4px;" onclick="closeBadgeUnlock()">Fedt!</button>
+<!-- BADGE UNLOCK -->
+<div class="badge-unlock-overlay" id="badge-unlock-overlay" onclick="closeBadgeUnlock()">
+ <div id="bub-confetti"></div>
+ <div class="badge-unlock-box">
+  <div class="bub-eyebrow">Badge optjent</div>
+  <div id="bub-icon"></div>
+  <div class="bub-ttl" id="bub-ttl-text">Du har optjent badget</div>
+  <div class="bub-sub" id="bub-name"></div>
+  <div class="bub-reason" id="bub-reason"></div>
+  <button class="btn-primary" onclick="closeBadgeUnlock()" style="border-radius:16px;">Fantastisk</button>
  </div>
 </div>
 
-<!-- BADGE INFO POPUP -->
-<div class="badge-popup-overlay" id="badge-popup" onclick="if(event.target===this){this.classList.remove('open');setTimeout(function(){document.getElementById('badge-popup').style.display='none';},350);}">
- <div class="badge-popup-sheet">
+<!-- BADGE INFO -->
+<div class="badge-info-overlay" id="badge-info-overlay" onclick="if(event.target===this)closeBadgeInfo()">
+ <div class="badge-info-sheet">
   <div class="sheet-handle"></div>
   <div class="bps-icon" id="bps-icon"></div>
   <div class="bps-name" id="bps-name"></div>
@@ -502,326 +652,1056 @@ h3{font-size:16px;font-weight:600;color:var(--navy);}
  </div>
 </div>
 
-<!-- GØRE INAKTIV POPUP -->
-<div class="ep-overlay" id="ep-overlay" onclick="if(event.target===this)closeEP()">
- <div class="ep-sheet">
-  <div class="ep-handle"></div>
-  <h3 style="color:var(--navy);margin-bottom:6px;">Gør mål inaktivt</h3>
-  <p style="font-size:12px;color:var(--gray);margin-bottom:20px;">Målet flyttes til inaktive mål. Du kan altid genaktivere det igen.</p>
-  <button class="btn-primary" style="margin-bottom:10px;" onclick="confirmMakeInactive()">Ja, gør inaktivt</button>
-  <button class="btn-under" style="margin:0;max-width:100%;width:100%;" onclick="closeEP()">Annuller</button>
+<!-- PREV GOAL DETAIL -->
+<div class="prev-detail-overlay" id="prev-detail-overlay" onclick="if(event.target===this)closePrevDetail()">
+ <div class="prev-detail-sheet">
+  <div class="sheet-handle"></div>
+  <div id="prev-detail-content"></div>
  </div>
 </div>
 
-<!-- CONFIRM DELETE -->
+<!-- CONFIRM -->
 <div class="confirm-overlay" id="confirm-overlay">
  <div class="confirm-box">
-  <div class="confirm-icon">🗑️</div>
-  <div class="confirm-title">Slet mål?</div>
-  <div class="confirm-msg">Denne handling kan ikke fortrydes. Vil du permanent slette dette mål?</div>
+  <div class="confirm-ico"></div>
+  <div class="confirm-ttl">Slet mål?</div>
+  <div class="confirm-msg">Målet flyttes til tidligere mål og kan ikke gendannes som aktivt.</div>
   <div class="confirm-btns">
-   <button class="confirm-cancel" onclick="closeConfirm()">Behold mål</button>
-   <button class="confirm-del" onclick="doDelete()">Ja, slet det</button>
+   <button class="confirm-cancel" onclick="closeConfirm()">Annuller</button>
+   <button class="confirm-del" onclick="doDelete()">Slet</button>
+  </div>
+ </div>
+</div>
+
+<!-- ════════════════════════════════
+     DROPUS — floating resting position
+     ════════════════════════════════ -->
+<div id="dropus-rest" onclick="handleDropusRestTap()">
+ <svg viewBox="0 0 101 151" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g filter="url(#dr-glow)"><path d="M12 95C19 61 44 51 50.6 12C57 51 82 62 89 95C94 119 71 140 50.6 140C30 140 6.5 119 12 95Z" fill="#00A7E1" fill-opacity=".14"/></g>
+  <path id="dr-body" d="M16 95C22 63 45 55 50.6 18C56.5 54 79 63 85 95C89 116 69 135 50.6 135C32 135 11 116 16 95Z" fill="#00A8E0"/>
+  <ellipse cx="37" cy="58" rx="5.5" ry="9" fill="rgba(255,255,255,.22)" transform="rotate(-18 37 58)"/>
+  <ellipse cx="43" cy="78" rx="3.4" ry="5.8" fill="#fff"/>
+  <ellipse cx="58" cy="78" rx="3.4" ry="5.8" fill="#fff"/>
+  <ellipse cx="42.2" cy="77" rx="1.9" ry="3.4" fill="#1a3a5c"/>
+  <ellipse cx="57.2" cy="77" rx="1.9" ry="3.4" fill="#1a3a5c"/>
+  <ellipse cx="43" cy="75.5" rx=".75" ry="1.2" fill="#fff"/>
+  <ellipse cx="58" cy="75.5" rx=".75" ry="1.2" fill="#fff"/>
+  <path id="dr-mouth" d="M44 91 Q50.5 95 57 91" stroke="#1a3a5c" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <defs><filter id="dr-glow"><feGaussianBlur stdDeviation="5"/></filter></defs>
+ </svg>
+</div>
+
+<!-- ════════ DROPUS STAGE ════════ -->
+<div class="dropus-stage" id="dropus-stage">
+ <div class="dropus-dim" id="dropus-dim" onclick="dismissDropus()"></div>
+ <div class="dropus-center" id="dropus-center">
+  <svg class="dropus-center-svg" viewBox="0 0 101 151" fill="none">
+   <path d="M16 95C22 63 45 55 50.6 18C56.5 54 79 63 85 95C89 116 69 135 50.6 135C32 135 11 116 16 95Z" fill="#00A8E0"/>
+   <ellipse cx="37" cy="58" rx="5.5" ry="9" fill="rgba(255,255,255,.22)" transform="rotate(-18 37 58)"/>
+   <ellipse cx="43" cy="78" rx="3.4" ry="5.8" fill="#fff"/>
+   <ellipse cx="58" cy="78" rx="3.4" ry="5.8" fill="#fff"/>
+   <ellipse cx="42.2" cy="77" rx="1.9" ry="3.4" fill="#1a3a5c"/>
+   <ellipse cx="57.2" cy="77" rx="1.9" ry="3.4" fill="#1a3a5c"/>
+   <ellipse cx="43" cy="75.5" rx=".75" ry="1.2" fill="#fff"/>
+   <ellipse cx="58" cy="75.5" rx=".75" ry="1.2" fill="#fff"/>
+   <path id="stage-mouth" d="M44 91 Q50.5 95 57 91" stroke="#1a3a5c" stroke-width="2" stroke-linecap="round" fill="none"/>
+  </svg>
+  <div class="dropus-bubble-box">
+   <div class="dropus-typewriter" id="dropus-tw"></div>
+   <div class="dropus-actions" id="dropus-actions"></div>
   </div>
  </div>
 </div>
 
 <script>
-// ============================================================
-// CONSTANTS & DATE
-// ============================================================
-var PRICE=0.05855,WG=1750,DAILY=250;
+/* ════════════════════════════════════════
+   CONSTANTS & HELPERS
+════════════════════════════════════════ */
+var PRICE=0.05855, WG=1750, DAILY=250;
 var today=new Date();
-var todayDow=today.getDay();
-var dayIdx=todayDow===0?6:todayDow-1;
-var DAY_NAMES=['Man','Tirs','Ons','Tors','Fre','Lør','Søn'];
-var MNS_LOW=['januar','februar','marts','april','maj','juni','juli','august','september','oktober','november','december'];
-var MNS_CAP=['Januar','Februar','Marts','April','Maj','Juni','Juli','August','September','Oktober','November','december'];
+var todayDow=today.getDay(), dayIdx=todayDow===0?6:todayDow-1;
+var DAY=['Man','Tirs','Ons','Tors','Fre','Lør','Søn'];
+var MNS=['januar','februar','marts','april','maj','juni','juli','august','september','oktober','november','december'];
+var MNSCAP=['Januar','Februar','Marts','April','Maj','Juni','Juli','August','September','Oktober','November','December'];
 
 function mondayOf(d){var day=d.getDay(),diff=day===0?-6:1-day,m=new Date(d);m.setDate(d.getDate()+diff);return m;}
-var wMon=mondayOf(today);
-var wDates=[];
-for(var i=0;i<7;i++){var _dx=new Date(wMon);_dx.setDate(wMon.getDate()+i);wDates.push(_dx);}
+var wMon=mondayOf(today), wDates=[];
+for(var i=0;i<7;i++){var _d=new Date(wMon);_d.setDate(wMon.getDate()+i);wDates.push(_d);}
 
-// ── SINGLE canonical usage function ──
-// Key: uses ONLY dayOfYear + year, same seed everywhere
-function dayOfYear(d){return Math.floor((d-new Date(d.getFullYear(),0,0))/86400000);}
-function seededRand(s){var x=s;return function(){x=(x*9301+49297)%233280;return x/233280;};}
+function doy(d){return Math.floor((d-new Date(d.getFullYear(),0,0))/86400000);}
+function srand(s){var x=s;return function(){x=(x*9301+49297)%233280;return x/233280;};}
+
+/* More varied daily usage — realistic variation */
 function dayUsage(d){
-  // d is a Date object
-  var yr=d.getFullYear(),doy=dayOfYear(d);
-  var seed=yr*10000+doy;
-  var r=seededRand(seed);
-  return Math.round(130+r()*180);
+  var yr=d.getFullYear(), dd=doy(d);
+  var r=srand(yr*10000+dd);
+  var base=160+r()*120;
+  var dow=d.getDay();
+  var wknd=(dow===0||dow===6)?25:0;
+  var r2=srand(yr*99+dd*7);
+  var noise=(r2()-0.5)*50;
+  return Math.round(Math.max(100, base+wknd+noise));
 }
 
 function weekNum(d){var dt=new Date(d);dt.setHours(0,0,0,0);dt.setDate(dt.getDate()+3-(dt.getDay()+6)%7);var w1=new Date(dt.getFullYear(),0,4);return 1+Math.round(((dt-w1)/86400000-3+(w1.getDay()+6)%7)/7);}
 
-// Build this week's usage map — same function used by both home+calendar
 var wUsage={};
 for(var i=0;i<=dayIdx;i++){var _dd=wDates[i];wUsage[_dd.toDateString()]=dayUsage(_dd);}
 function totalWeek(){return Object.values(wUsage).reduce(function(a,b){return a+b;},0);}
-var todayUsage=wUsage[today.toDateString()]||0;
 
-// ============================================================
-// ICONS
-// ============================================================
+/* ════════════════════════════════════════
+   ICONS
+════════════════════════════════════════ */
 var ICONS={
-  vm:'<svg width="21" height="31" viewBox="0 0 21 31" fill="none"><path d="M13.09 25.26C12.27 25.48 11.4 25.6 10.5 25.6C9.67 25.6 8.86 25.5 8.09 25.31M13.09 25.26V27.13M13.09 25.26C17.36 24.1 20.5 20.16 20.5 15.48C20.5 10.81 17.36 6.87 13.09 5.71M8.09 25.31V27.13M8.09 25.31C3.73 24.22.5 20.23.5 15.48.5 10.81 3.64 6.87 7.91 5.71M8.09 27.13H13.09M8.09 27.13H7.6C7.15 27.13 6.8 27.49 6.8 27.94V29.69C6.8 30.14 7.15 30.5 7.6 30.5H13.4C13.85 30.5 14.2 30.14 14.2 29.69V27.94C14.2 27.49 13.85 27.13 13.4 27.13H13.09M7.91 5.71C8.73 5.49 9.6 5.37 10.5 5.37C11.4 5.37 12.27 5.49 13.09 5.71M7.91 5.71V3.87M13.09 5.71V3.87M13.09 3.87H7.91M13.09 3.87H13.4C13.85 3.87 14.2 3.51 14.2 3.06V1.31C14.2.86 13.85.5 13.4.5H7.6C7.15.5 6.8.86 6.8 1.31V3.06C6.8 3.51 7.15 3.87 7.6 3.87H7.91M18.26 15.32C18.26 19.56 14.78 22.99 10.5 22.99C6.22 22.99 2.74 19.56 2.74 15.32C2.74 11.09 6.22 7.65 10.5 7.65C14.78 7.65 18.26 11.09 18.26 15.32ZM6.48 15.11H14.52C14.96 15.11 15.31 14.75 15.31 14.3V12.17C15.31 11.73 14.96 11.36 14.52 11.36H6.48C6.04 11.36 5.68 11.73 5.68 12.17V14.3C5.68 14.75 6.04 15.11 6.48 15.11ZM10.5 16.61C11.24 17.73 11.98 18.66 11.98 19.42C11.98 20.17 11.5 20.65 10.5 20.73C9.59 20.76 9.02 19.98 9.02 19.42C9.02 18.29 9.94 17.36 10.5 16.61Z" stroke="#1B3B5F"/></svg>',
+  vm:'<svg width="21" height="31" viewBox="0 0 21 31" fill="none"><path d="M13.09 25.26C12.27 25.48 11.4 25.6 10.5 25.6C9.67 25.6 8.86 25.5 8.09 25.31M13.09 25.26V27.13M13.09 25.26C17.36 24.1 20.5 20.16 20.5 15.48C20.5 10.81 17.36 6.87 13.09 5.71M8.09 25.31V27.13M8.09 25.31C3.73 24.22.5 20.23.5 15.48.5 10.81 3.64 6.87 7.91 5.71M8.09 27.13H13.09M8.09 27.13H7.6C7.15 27.13 6.8 27.49 6.8 27.94V29.69C6.8 30.14 7.15 30.5 7.6 30.5H13.4C13.85 30.5 14.2 30.14 14.2 29.69V27.94C14.2 27.49 13.85 27.13 13.4 27.13H13.09M7.91 5.71C8.73 5.49 9.6 5.37 10.5 5.37C11.4 5.37 12.27 5.49 13.09 5.71M7.91 5.71V3.87M13.09 5.71V3.87M13.09 3.87H7.91M13.09 3.87H13.4C13.85 3.87 14.2 3.51 14.2 3.06V1.31C14.2.86 13.85.5 13.4.5H7.6C7.15.5 6.8.86 6.8 1.31V3.06C6.8 3.51 7.15 3.87 7.6 3.87H7.91" stroke="#1B3B5F"/></svg>',
   tl:'<svg width="20" height="31" viewBox="0 0 20 31" fill="none"><path d="M2.42 14.18H1.74C.09 14.18.09 17.09 1.74 17.09H2.72M2.42 14.18L4.9 4.21C5.37 2.46 5.84 2.27 8.74 2.25M2.42 14.18H17.46M17.46 14.18H18.29C19.87 14.18 19.94 17.09 18.29 17.09H17.46M17.46 14.18C17.46 14.18 15.65 5.74 15.05 4.21C14.38 2.5 14.1 2.28 11.14 2.25M8.74 2.25C9.1 2.25 9.5 2.25 9.94 2.25C10.45 2.25 10.74 2.25 11.14 2.25M8.74 2.25C8.74 1.52 8.74.5 9.94.5C11.14.5 11.14 1.52 11.14 2.25M2.72 17.09H17.46M2.72 17.09C2.95 18.06 4 19.8 5.77 21.02M17.46 17.09C17.27 18.23 16.31 19.87 14.66 21.02M5.77 21.02C6.94 21.82 8.41 22.4 10.16 22.4C11.99 22.4 13.5 21.83 14.66 21.02M5.77 21.02C6.12 24.24 4.97 27.13 4.97 27.93C4.97 31.36 15.28 31.36 15.28 27.93C15.28 26.84 14.15 24.95 14.66 21.02" stroke="#1B3B5F"/></svg>',
-  br:'<svg width="27" height="30" viewBox="0 0 27 30" fill="none"><path d="M1.52 2.72C3.91-1.23 10.81-1.23 13.69 5.06C15.25 4.94 16.61 4.98 17.85 5.54C19.09 6.11 20.1 7.15 21.1 8.8L21.14 8.78C22.74 8.04 24.33 8.37 24.99 9.63C25.62 10.85 25.07 12.4 23.62 13.49L23.59 13.51L13.6 19.51L13.55 19.54C12.69 19.97 11.85 20.1 11.12 19.93C10.39 19.76 9.82 19.29 9.51 18.66C8.91 17.39 9.48 15.8 11.04 14.81C10.49 12.79 10.08 11.06 10.18 9.58C10.27 8.02 10.91 6.76 12.26 5.63C9.78.28 4.44.88 2.85 3.51C2.41 4.24 2.1 5.25 1.89 6.66C1.68 8.06 1.58 9.8 1.55 11.96C1.49 16.3 1.69 22.1 1.69 30H.14C.14 22.2-.05 16.26.01 11.94.04 9.76.14 8.06.36 6.43.58 4.93.94 3.69 1.52 2.72Z" stroke="#1B3B5F"/><circle cx="25.04" cy="18.33" r="1.3" fill="#1B3B5F"/><circle cx="24.26" cy="24.56" r="1.3" fill="#1B3B5F"/><circle cx="18.33" cy="22.01" r="1.3" fill="#1B3B5F"/></svg>',
-  vh:'<svg width="38" height="31" viewBox="0 0 38 31" fill="none"><path d="M28.41 19.59H37.5C37.5 24.03 33.15 30.5 29.05 30.5H9.46C4.64 30.5.5 24.66.5 19.59H16.76M28.41 19.59V16.29C28.41 15.65 27.13 15.4 25.72 15.4C23.98 15.4 22.9 15.65 22.9 16.29V19.59M28.41 19.59H22.9M22.9 19.59H20.09M16.76 19.59C16.76 10.83 16.76 7.66 16.76 7.66C16.76 2.84 18.82 1.51 20.86.81C22.34.3 24.03.45 25.72 1.06C28.03 1.89 29.43 5.12 29.43 7.66H26.36C26.36 5.12 25 3.34 23.16 3.34C21.32 3.34 20.09 4.1 20.09 7.66V19.59M16.76 19.59H20.09M14.2 16.29C14.2 15.65 12.92 15.4 11.51 15.4C9.77 15.4 8.69 15.65 8.69 16.29V19.59H14.2V16.29Z" stroke="#1B3B5F"/></svg>',
-  op:'<svg width="26" height="31" viewBox="0 0 26 31" fill="none"><path d="M.5 5.69V.5H25.5V5.69M.5 5.69V30.5H25.5V5.69M.5 5.69H25.5M4.7 3.78C4.7 2.1 6.16 2.1 6.16 2.1C6.16 2.1 7.53 2.1 7.53 3.78M18.54 3.78C18.54 3.78 17.7 3.02 17.7 3.02C17.66 2.54 18.54 2.1 18.54 2.1H21.6C21.6 2.1 22.44 3.02 22.44 3.02C22.4 3.46 21.6 3.78 21.6 3.78" stroke="#1B3B5F"/></svg>',
-  vk:'<svg width="26" height="31" viewBox="0 0 26 31" fill="none"><path d="M.5 5.69V.5H25.5V5.69M.5 5.69V30.5H25.5V5.69M.5 5.69H25.5M6 3.78C6 2.1 7.46 2.1 7.46 2.1C7.46 2.1 8.83 2.1 8.83 3.78M1.88 3.78C1.88 2.1 3.33 2.1 3.33 2.1C3.33 2.1 4.7 2.1 4.7 3.78M19.77 3.78C19.77 3.78 18.93 3.02 18.93 3.02C18.88 2.54 19.77 2.1 19.77 2.1H22.82C22.82 2.1 23.67 3.02 23.67 3.02C23.62 3.46 22.82 3.78 22.82 3.78M18.77 15.99C18.77 15.99 17.32 11.14 13.04 11.11C9.83 11.09 7.29 13.71 7.23 16.91C7.16 20.18 9.52 22.79 13.04 22.79C17.17 22.79 18.77 18.21 18.77 18.21C17.78 18.21 16.25 18.36 16.25 17.06C16.25 15.77 17.85 15.99 18.77 15.99ZM13.04 25.31C17.6 25.29 21.23 21.62 21.3 17.06C21.36 12.45 17.66 8.61 13.04 8.59C8.39 8.57 4.64 12.43 4.7 17.06C4.77 21.64 8.46 25.33 13.04 25.31Z" stroke="#1B3B5F"/></svg>',
-  hv:'<svg width="31" height="31" viewBox="0 0 31 31" fill="none"><path d="M15.06 6.66C17.84 7.7 19.82 10.36 19.69 13.47C19.53 17.28 16.43 20.13 12.63 20.19C8.75 20.25 5.49 17.34 5.33 13.47C5.2 10.29 7.54 7.51 10.42 6.52M15.06 6.66V2.39M15.06 6.66C17.84 7.7 19.82 10.36 19.69 13.47M10.42 6.52V2.39M10.42 6.52C7.54 7.51 5.2 10.29 5.33 13.47C5.49 17.34 8.75 20.25 12.63 20.19C16.43 20.13 19.53 17.28 19.69 13.47M1.27 13.47V26.21L2.32 30.38H4.63L5.79 26.21V22.05M1.27 13.47C1.34 17.04 3.12 20.11 5.79 22.05M1.27 13.47C1.16 8.08 5.33 3.5 10.42 2.39M10.42 2.39H14.82M14.82 2.39V.5H10.42V2.39M14.82 2.39H26.06V6.52H14.82M14.82 6.52V2.39M14.82 6.52C17.48 2.92 19.87 4.44 21.55 6.52H26.06M5.79 26.21H7.07M26.06 2.39H30V6.52H26.06M26.06 2.39V.97M26.06 6.52V7.91M0 26.21H1.27" stroke="#1B3B5F"/></svg>'
-};
-var ENHED_NAMES={vm:'Vandmåler',tl:'Toilet',br:'Bruser',vh:'Vandhaner',op:'Opvaskemaskine',vk:'Vaskemaskine',hv:'Haveslange'};
-
-// ============================================================
-// FACTS
-// ============================================================
-var FACTS={
-  vm:[
-    {title:'En families forbrug koster over 6.800 kr. om året',text:'En parcelhus-familie på to voksne og to børn bruger ca. 146 m³ vand om året, svarende til ca. 6.800 kr. Hertil kommer prisen på opvarmning af det varme vand til bad, opvask og lignende.'},
-    {title:'Tjek for utætheder med din vandmåler',text:'Aflæs vandmåleren om aftenen, når alle er gået i seng — og igen om morgenen, inden nogen bruger vand. Er aflæsningerne forskellige, er der sandsynligvis en utæthed i installationen.'},
-    {title:'Vandmåleren advarer om lækager',text:'Vandmåleren er programmeret til at registrere perioder helt uden forbrug. En utæt vandledning under gulvet, der løber i måneder, er en dyr affære. Aflæs din vandmåler mindst én gang om måneden.'}
-  ],
-  tl:[
-    {title:'Et løbende toilet kan koste over 1.000 kr. om året',text:'Et toilet der "løber" kan nemt koste mere end 1.000 kr. om året. Hør efter lyden — en svag løbende lyd fra toilettet er et klart tegn.'},
-    {title:'Brug dobbeltskyl og spar 5-6 liter pr. skyl',text:'Udskift et gammelt toilet med et nyt dobbeltskyllende model med både stort og lille skyl. Brug "lille skyl" og spar 5-6 liter vand pr. skyl.'},
-    {title:'Undlad at bruge toilettet som skraldespand',text:'Undlad at skylle småting som snotpapir ud i toilettet — det er spild af rent vand og kan belaste rørene.'}
-  ],
-  br:[
-    {title:'Et brusebad koster over 1 kr. i minuttet',text:'Et brusebad koster over én krone i minuttet i rent vand. Skift til en vandsparende brusertype, hvis du ikke allerede har gjort det.'},
-    {title:'2 minutters kortere bad sparer familien 158 kr./måned',text:'Hvis en familie på 3 alle reducerer et dagligt bad med 2 minutter, spares der ca. 30 liter pr. person pr. dag — det svarer til ca. 158 kr. i vand om måneden.'},
-    {title:'Et sparebrusehoved reducerer vandforbruget markant',text:'Et sparebrusehoved reducerer vandgennemstrømningen til 6-8 liter pr. minut mod 12-20 liter for et standard brusehoved — uden at du mærker forskel på vandtrykket.'}
-  ],
-  vh:[
-    {title:'En dryppende vandhane kan koste 500–3.800 kr. om året',text:'Afhængigt af drypfrekvensen kan en utæt vandhane spilde fra 500 til 3.800 kr. om året. Tjek dine haner regelmæssigt.'},
-    {title:'Lad ikke vandet løbe under tandbørstning',text:'Lad være med at lade vandet løbe, mens du børster tænder. Det sparer op til 6 liter pr. minut — alene ved denne ene vane.'},
-    {title:'Installer luftblandere og spar vand nemt',text:'Luftblandere på vandhanerne er nemme og billige at installere, og de er en effektiv måde at spare vand på uden at gå på kompromis med vandstyrken.'}
-  ],
-  op:[{title:'Opvaskemaskinen bruger kun 10-13 l pr. vask',text:'En moderne opvaskemaskine bruger kun 10-13 liter pr. vask — langt mere effektivt end håndopvask, som typisk bruger 40-60 liter. Kør altid maskinen med fuld last.'}],
-  vk:[
-    {title:'En 10 år gammel maskine bruger dobbelt så meget',text:'Hvis din vaskemaskine er 10 år gammel, bruger den ca. 100 liter pr. vask. En ny maskine med A-mærke bruger halvdelen. Det er en stor besparelse over tid.'},
-    {title:'Brug spare-programmet',text:'Brug spare-programmet på vaskemaskinen, som reducerer forbruget af både el og vand — og tøjet bliver ligeså rent.'},
-    {title:'Tænk over, om tøjet trænger til en vask',text:'Overvej om du kan bruge tøjet en dag til, inden det ryger i vasketøjskurven. Ofte kan du også springe forvasken over.'}
-  ],
-  hv:[{title:'Vand morgen eller aften og spar op til 30%',text:'Vanding af en parcelhus-plæne bruger 300-500 liter pr. gang. Vander du om morgenen eller aftenen, undgår du fordampning i varmen og sparer op til 30% vand.'}]
+  br:'<svg width="27" height="30" viewBox="0 0 27 30" fill="none"><path d="M1.52 2.72C3.91-1.23 10.81-1.23 13.69 5.06C15.25 4.94 16.61 4.98 17.85 5.54C19.09 6.11 20.1 7.15 21.1 8.8L21.14 8.78C22.74 8.04 24.33 8.37 24.99 9.63C25.62 10.85 25.07 12.4 23.62 13.49L13.6 19.51C12.69 19.97 11.85 20.1 11.12 19.93C10.39 19.76 9.82 19.29 9.51 18.66C8.91 17.39 9.48 15.8 11.04 14.81C10.49 12.79 10.08 11.06 10.18 9.58C10.27 8.02 10.91 6.76 12.26 5.63C9.78.28 4.44.88 2.85 3.51C2.41 4.24 2.1 5.25 1.89 6.66C1.68 8.06 1.58 9.8 1.55 11.96C1.49 16.3 1.69 22.1 1.69 30H.14C.14 22.2-.05 16.26.01 11.94.04 9.76.14 8.06.36 6.43.58 4.93.94 3.69 1.52 2.72Z" stroke="#1B3B5F"/><circle cx="25.04" cy="18.33" r="1.3" fill="#1B3B5F"/><circle cx="24.26" cy="24.56" r="1.3" fill="#1B3B5F"/><circle cx="18.33" cy="22.01" r="1.3" fill="#1B3B5F"/></svg>',
+  vh:'<svg width="38" height="31" viewBox="0 0 38 31" fill="none"><path d="M28.41 19.59H37.5C37.5 24.03 33.15 30.5 29.05 30.5H9.46C4.64 30.5.5 24.66.5 19.59H16.76M28.41 19.59V16.29C28.41 15.65 27.13 15.4 25.72 15.4C23.98 15.4 22.9 15.65 22.9 16.29V19.59M28.41 19.59H22.9M22.9 19.59H20.09M16.76 19.59V7.66C16.76 2.84 18.82 1.51 20.86.81C22.34.3 24.03.45 25.72 1.06C28.03 1.89 29.43 5.12 29.43 7.66H26.36C26.36 5.12 25 3.34 23.16 3.34C21.32 3.34 20.09 4.1 20.09 7.66V19.59M16.76 19.59H20.09M14.2 16.29C14.2 15.65 12.92 15.4 11.51 15.4C9.77 15.4 8.69 15.65 8.69 16.29V19.59H14.2V16.29Z" stroke="#1B3B5F"/></svg>',
+  op:'<svg width="26" height="31" viewBox="0 0 26 31" fill="none"><path d="M.5 5.69V.5H25.5V5.69M.5 5.69V30.5H25.5V5.69M.5 5.69H25.5M4.7 3.78C4.7 2.1 6.16 2.1 6.16 2.1 6.16 2.1 7.53 2.1 7.53 3.78M18.54 3.78C18.54 3.78 17.7 3.02 17.7 3.02 17.66 2.54 18.54 2.1 18.54 2.1H21.6C21.6 2.1 22.44 3.02 22.44 3.02 22.4 3.46 21.6 3.78 21.6 3.78" stroke="#1B3B5F"/></svg>',
+  vk:'<svg width="26" height="31" viewBox="0 0 26 31" fill="none"><path d="M.5 5.69V.5H25.5V5.69M.5 5.69V30.5H25.5V5.69M.5 5.69H25.5M6 3.78C6 2.1 7.46 2.1 7.46 2.1 7.46 2.1 8.83 2.1 8.83 3.78M1.88 3.78C1.88 2.1 3.33 2.1 3.33 2.1 3.33 2.1 4.7 2.1 4.7 3.78M13.04 25.31C17.6 25.29 21.23 21.62 21.3 17.06 21.36 12.45 17.66 8.61 13.04 8.59 8.39 8.57 4.64 12.43 4.7 17.06 4.77 21.64 8.46 25.33 13.04 25.31Z" stroke="#1B3B5F"/></svg>',
+  hv:'<svg width="31" height="31" viewBox="0 0 31 31" fill="none"><path d="M15.06 6.66C17.84 7.7 19.82 10.36 19.69 13.47C19.53 17.28 16.43 20.13 12.63 20.19C8.75 20.25 5.49 17.34 5.33 13.47C5.2 10.29 7.54 7.51 10.42 6.52M15.06 6.66V2.39M10.42 6.52V2.39M10.42 2.39H14.82M14.82 2.39V.5H10.42V2.39M14.82 2.39H26.06V6.52H14.82M14.82 6.52V2.39M1.27 13.47V26.21L2.32 30.38H4.63L5.79 26.21V22.05M1.27 13.47C1.34 17.04 3.12 20.11 5.79 22.05M5.79 26.21H7.07M26.06 2.39H30V6.52H26.06M0 26.21H1.27" stroke="#1B3B5F"/></svg>'
 };
 
-// ============================================================
-// READ TRACKING (no sessionStorage — resets every time for usability testing)
-// ============================================================
-var readUnits=[];
-function markRead(id){if(readUnits.indexOf(id)===-1)readUnits.push(id);}
-function hasRead(id){return readUnits.indexOf(id)>-1;}
-function nysgerrigEarned(){return readUnits.length>=3;}
-var nysgerrigShown=false; // confetti shown once per session
+/* ════════════════════════════════════════
+   STATE
+════════════════════════════════════════ */
+var activeLimit=1750, activeTitle='Mål #1', activeDesc='', activeWeeks=3, goalNum=1;
+var prevGoals=[];
+var prevOpen=false, husOpen=false;
+var infoBubbleOpen=false;
+var titleEditOpen=false, descEditOpen=false;
+/* calView, calPeriod, calMonth, calYear, weekOffset declared in KALENDER section */
 
-// ============================================================
-// GOALS
-// ============================================================
-var goals=[
-  {id:'main',limit:1750,active:true,weeks:3,deletable:true},
-  {id:'g1000',limit:1000,active:false,weeks:0,deletable:true}
+/* Badge definitions */
+var BADGES=[
+  {id:'nysgerrig', name:'Den nysgerrige', earned:false,
+   color:'#0077CC', bgColor:'#E0F0FF',
+   how:'Tryk på Dropus tre gange og læs vandtipset.',
+   reason:'Du fik dette badge fordi du var nysgerrig og læste Dropus\' vandtip!'},
+  {id:'ambitioes', name:'Den ambitiøse', earned:false,
+   color:'#B8860B', bgColor:'#FFF3C4',
+   how:'Opret dit første nye mål i appen.',
+   reason:'Du fik dette badge fordi du satte et nyt mål for dig selv — det er ambitiøst!'},
+  {id:'vedholdende', name:'Den vedholdende', earned:false,
+   color:'#7B3FC4', bgColor:'#F0E8FF',
+   how:'Overhold dit ugentlige vandmål i 4 uger i træk.',
+   reason:'Du har overholdt dit mål i 4 uger i træk — imponerende!'}
 ];
-var epGoalId=null,deleteGoalId=null;
 
-// ============================================================
-// NAVIGATION
-// ============================================================
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
-  document.getElementById(id).classList.add('active');
-  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
-  if(id==='home-screen')document.getElementById('tab-home').classList.add('active');
-  else if(id==='goals-screen'||id==='create-goal-screen')document.getElementById('tab-goals').classList.add('active');
-  else if(id==='learn-screen'||id==='enhed-screen')document.getElementById('tab-learn').classList.add('active');
-  closeDots();
-  if(id==='home-screen')renderHome();
-  if(id==='goals-screen')renderGoals();
-  if(id==='calendar-screen')renderCal();
-  if(id==='learn-screen')renderLearn();
-  if(id==='badges-screen')renderBadges();
+/* Tap counter — resets after tip shown so user can tap again */
+var dropusTapCount=0;
+var nysgerrigEarned=false, ambitioesEarned=false;
+var twTimer=null, dropusActive=false, dropusCurrentMode=null;
+
+/* ════════════════════════════════════════
+   GREETING
+════════════════════════════════════════ */
+function setGreeting(){
+  var h=new Date().getHours();
+  document.getElementById('greeting-word').textContent=h<12?'Godmorgen':h<18?'God eftermiddag':'God aften';
 }
 
-// ============================================================
-// HOME
-// ============================================================
-function renderHome(){renderUge();renderSpareTekst();renderMitMaal();}
+/* ════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════ */
+var screenHistory=['home-screen'];
+var swX=0,swY=0;
+
+function showScreen(id){
+  if(screenHistory[screenHistory.length-1]!==id){
+    if(id==='home-screen') screenHistory=['home-screen'];
+    else screenHistory.push(id);
+  }
+  _activate(id);
+}
+function goBack(){
+  if(screenHistory.length>1){screenHistory.pop();}
+  _activate(screenHistory[screenHistory.length-1]);
+}
+function _activate(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  _updateTabs(id);
+  closeDots();
+  if(id==='home-screen') renderHome();
+  else if(id==='goals-screen') renderGoals();
+  else if(id==='calendar-screen'){renderCal(); setView(calView);}
+  else if(id==='badges-screen') renderBadges();
+  else if(id==='create-goal-screen') initCreateGoal();
+}
+function _updateTabs(id){
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  if(id==='home-screen'||id==='badges-screen') document.getElementById('tab-home').classList.add('active');
+  else if(['goals-screen','create-goal-screen','calendar-screen'].indexOf(id)>-1) document.getElementById('tab-goals').classList.add('active');
+}
+
+document.addEventListener('touchstart',function(e){swX=e.touches[0].clientX;swY=e.touches[0].clientY;},{passive:true});
+document.addEventListener('touchend',function(e){
+  var dx=e.changedTouches[0].clientX-swX, dy=e.changedTouches[0].clientY-swY;
+  if(Math.abs(dx)<55||Math.abs(dx)<Math.abs(dy)*1.4) return;
+  if(document.querySelector('.popup-overlay.open,.badge-unlock-overlay.open,.badge-info-overlay.open,.confirm-overlay.open')) return;
+  if(dropusActive) return;
+  if(dx>0) goBack();
+},{passive:true});
+
+/* ════════════════════════════════════════
+   DROPUS ENGINE
+════════════════════════════════════════ */
+function handleDropusRestTap(){
+  var curScreen=screenHistory[screenHistory.length-1];
+  if(curScreen!=='home-screen'){
+    showScreen('home-screen');
+    return;
+  }
+  /* On home: count taps — shake all inline dropus elements */
+  dropusTapCount++;
+  document.querySelectorAll('.dropus-inline').forEach(function(el){
+    el.classList.remove('mascot-shake');
+    void el.offsetWidth;
+    el.classList.add('mascot-shake');
+  });
+  if(dropusTapCount>=3){
+    dropusTapCount=0; /* reset so user can tap again */
+    if(!dropusActive){
+      showDropus('tip',
+        'Et brusebad koster over 1 krone i minuttet alene i vand — hertil kommer varme og spildevand oveni.',
+        '<button class="dropus-dismiss-btn" onclick="dismissDropus()">Forstået, tak!</button>'
+      );
+    }
+  }
+}
+
+function showDropus(mode, text, actionsHTML){
+  if(dropusActive) return;
+  dropusActive=true; dropusCurrentMode=mode;
+  var stage=document.getElementById('dropus-stage');
+  var tw=document.getElementById('dropus-tw');
+  var act=document.getElementById('dropus-actions');
+  tw.textContent=''; act.innerHTML='';
+  /* inline dropus elements remain visible while stage shows */
+  stage.classList.add('active');
+  /* animate mouth open */
+  animateStageMouth(true);
+  /* typewriter after 500ms (character arrives) */
+  setTimeout(function(){
+    typewriter(tw, text, 22, function(){
+      act.innerHTML=actionsHTML||'';
+    });
+  },500);
+}
+
+function dismissDropus(){
+  if(!dropusActive) return;
+  var mode=dropusCurrentMode;
+  dropusActive=false; dropusCurrentMode=null;
+  if(twTimer){clearTimeout(twTimer);twTimer=null;}
+  var stage=document.getElementById('dropus-stage');
+  animateStageMouth(false);
+  stage.classList.remove('active');
+  /* dropus-rest is hidden; inline elements always visible */
+  /* after-effects */
+  if(mode==='tip'&&!nysgerrigEarned){
+    nysgerrigEarned=true;
+    BADGES.find(function(b){return b.id==='nysgerrig';}).earned=true;
+    renderHome();
+    setTimeout(function(){showBadgeUnlock('nysgerrig');},300);
+  }
+  if(mode==='congrats'){
+    renderHome(); renderGoals();
+    if(!ambitioesEarned){
+      ambitioesEarned=true;
+      BADGES.find(function(b){return b.id==='ambitioes';}).earned=true;
+      setTimeout(function(){showBadgeUnlock('ambitioes');},400);
+    }
+  }
+}
+
+function animateStageMouth(open){
+  var m=document.getElementById('stage-mouth');
+  if(!m) return;
+  var frame=0,total=10;
+  var iv=setInterval(function(){
+    frame++;
+    var t=Math.min(frame/total,1);
+    var cy=open?(95+t*8):(103-t*8);
+    m.setAttribute('d','M44 91 Q50.5 '+cy+' 57 91');
+    if(frame>=total) clearInterval(iv);
+  },35);
+}
+
+function typewriter(el,text,speed,done){
+  var i=0;
+  function step(){
+    if(i<text.length){el.textContent+=text[i++];twTimer=setTimeout(step,speed);}
+    else{twTimer=null;if(done)done();}
+  }
+  step();
+}
+
+/* ════════════════════════════════════════
+   HOME
+════════════════════════════════════════ */
+function renderHome(){
+  setGreeting();
+  renderStreak();
+  renderUge();
+  renderSpareTxt();
+  renderHomeMaal();
+  renderHomeBadges();
+}
+
+function renderStreak(){
+  if(!activeLimit){
+    document.getElementById('streak-sub').textContent='Ingen aktiv målsætning';
+    document.getElementById('streak-ok-txt').textContent='';
+    document.getElementById('home-streak-drop').innerHTML='';
+    return;
+  }
+  var tot=totalWeek(), under=tot<=activeLimit;
+  document.getElementById('streak-sub').textContent='Ugentligt forbrug under '+activeLimit.toLocaleString('da-DK')+' l/uge';
+  document.getElementById('streak-ok-txt').textContent=under?'Mål overholdt':'Mål overskredet';
+  var dc=under?'#128A00':'#CC4400';
+  document.getElementById('home-streak-drop').innerHTML=dropSVG(dc,activeWeeks,'ds0');
+}
+
+function dropSVG(color,weeks,filtId){
+  /* Solid orange flame from Figma — no cutout, white text */
+  return '<svg width="37" height="48" viewBox="0 0 37 48" fill="none">'+
+    '<path fill-rule="evenodd" clip-rule="evenodd" d="M20.351 0C18.9806 3.78953 19.8631 12.8419 28.3779 17.8788C38.0692 23.6117 37.9703 34.4944 35.8172 38.6726C32.1811 45.7288 22.7982 50.5594 10.6599 46.5431C-3.37426 41.8996 -1.28243 19.6278 4.10147 17.1014C2.92677 23.4173 5.67318 28.9238 8.60433 30.0247C12.2262 31.385 9.48526 28.6644 8.60433 25.9437C6.46494 19.3363 6.45089 3.01219 20.351 0Z" fill="#F28D00"/>'+
+    '<text x="18.5" y="26" text-anchor="middle" font-family="Helvetica Neue,Arial,sans-serif" font-size="15" font-weight="700" fill="white">'+weeks+'</text>'+
+    '<text x="18.5" y="37" text-anchor="middle" font-family="Helvetica Neue,Arial,sans-serif" font-size="9" font-weight="600" fill="rgba(255,255,255,.9)">uger</text>'+
+    '</svg>';
+}
 
 function renderUge(){
-  var wn=weekNum(today);
-  var html='<div class="uge-label">Uge '+wn+'</div><div class="days-row">';
+  var wn=weekNum(today),html='<div class="uge-lbl">Uge '+wn+'</div><div class="days-row">';
   for(var i=0;i<7;i++){
-    var d=wDates[i],isToday=(i===dayIdx),isPast=(i<dayIdx);
-    var liters=wUsage[d.toDateString()]||0;
-    html+='<div class="day-col" data-idx="'+i+'">';
-    html+='<div class="day-name">'+DAY_NAMES[i]+'</div>';
-    html+='<div class="day-num'+(isToday?' today':'')+'">'+d.getDate()+'</div>';
-    if(isPast||isToday){
-      html+='<svg viewBox="0 0 14 20" fill="none" width="12" height="16"><path d="M2 10C3.5 4.5 7 3 7 0 7 0 10.5 4.5 12 10 13 14 10 18 7 18 4 18 1 14 2 10Z" fill="#00A7E1"/></svg>';
-      html+='<div class="day-lbl">'+liters+'l</div>';
-    }else{
-      html+='<svg viewBox="0 0 14 20" fill="none" width="12" height="16"><path d="M2 10C3.5 4.5 7 3 7 0 7 0 10.5 4.5 12 10 13 14 10 18 7 18 4 18 1 14 2 10Z" fill="#E0E0E0"/></svg>';
-      html+='<div class="day-lbl" style="color:#ccc">·</div>';
-    }
-    html+='</div>';
+    var d=wDates[i],isT=(i===dayIdx),isP=(i<dayIdx);
+    html+='<div class="day-col" data-idx="'+i+'"><div class="day-name">'+DAY[i]+'</div>'+
+      '<div class="day-num'+(isT?' today':isP?' past':'')+'">'+d.getDate()+'</div></div>';
   }
-  var tot=totalWeek();
-  html+='</div><div style="font-size:14px;color:var(--navy);">Du har brugt <strong style="font-size:28px;font-weight:700;">'+tot+'</strong> liter</div>';
+  html+='</div><div class="week-total-row">Brugt denne uge: <strong>'+totalWeek()+'</strong> liter</div>';
   document.getElementById('uge-card').innerHTML=html;
 }
 
 function handleUgeClick(e){
   var col=e.target.closest('.day-col');
-  if(col){
-    var idx=parseInt(col.dataset.idx);
-    if(idx<dayIdx){
-      var d=wDates[idx];
-      showScreen('calendar-screen');
-      setTimeout(function(){openDag(d.getFullYear(),d.getMonth(),d.getDate());},320);
-      return;
-    }
-  }
+  if(col){var idx=parseInt(col.dataset.idx);if(idx<dayIdx){var d=wDates[idx];showScreen('calendar-screen');setTimeout(function(){openDag(d.getFullYear(),d.getMonth(),d.getDate());},300);return;}}
   showScreen('calendar-screen');
 }
 
-function renderSpareTekst(){
-  var tot=totalWeek(),dg=dayIdx+1;
-  var avgDay=Math.round(tot/dg);
-  var savedL=Math.max(0,DAILY-avgDay);
-  var savedKr=(savedL*dg*PRICE).toFixed(0);
-  var el=document.getElementById('spare-tekst');
-  var bubble=document.getElementById('info-bubble');
-  if(savedL>0){
-    el.textContent='Du har sparet '+savedKr+' kr. denne uge!';
-    bubble.textContent='Grunden til at du har sparet '+savedKr+' kr. skyldes, at dit gennemsnitlige dagsforbrug er på '+avgDay+' l, hvilket er '+savedL+' l under det daglige mål på 250 l.';
-  }else{
-    var overL=Math.abs(savedL);
-    el.textContent='Dit daglige forbrug er '+avgDay+' l — lidt over dagsmålet på '+DAILY+' l.';
-    bubble.textContent='Dit gennemsnitlige dagsforbrug er '+avgDay+' l, som er '+overL+' l over dagsmålet på '+DAILY+' l. Prøv at skære lidt ned for at nå ugemålet.';
+function renderSpareTxt(){
+  var tot=totalWeek(),dg=dayIdx+1,avg=Math.round(tot/dg);
+  var saved=Math.max(0,DAILY-avg),kr=(saved*dg*PRICE).toFixed(0);
+  var el=document.getElementById('spare-txt'),bb=document.getElementById('info-bubble');
+  if(saved>0){el.textContent='Du har sparet '+kr+' kr. denne uge!';bb.textContent='Gennemsnitligt dagsforbrug: '+avg+' l — '+saved+' l under dagsmålet på '+DAILY+' l.';}
+  else{el.textContent='Dit daglige snit er '+avg+' l — lidt over dagsmålet.';bb.textContent='Prøv at reducere lidt for at nå ugemålet på '+activeLimit+' l.';}
+}
+function toggleInfo(){infoBubbleOpen=!infoBubbleOpen;document.getElementById('info-bubble').classList.toggle('open',infoBubbleOpen);}
+
+function renderHomeMaal(){
+  if(!activeLimit){
+    document.getElementById('home-maal-card').innerHTML=
+      '<div style="text-align:center;padding:8px 0 4px;">'+
+      '<div style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:4px;">Du har ingen mål</div>'+
+      '<div style="font-size:12px;color:var(--gray);">Opret et mål under Målsætninger</div>'+
+      '</div>';
+    return;
   }
-}
-
-var infoBubbleOpen=false;
-function toggleInfoBubble(){
-  infoBubbleOpen=!infoBubbleOpen;
-  document.getElementById('info-bubble').classList.toggle('open',infoBubbleOpen);
-}
-
-function renderMitMaal(){
-  var tot=totalWeek(),pct=Math.min(100,Math.round(tot/WG*100));
-  var rem=Math.max(0,WG-tot),kr=(tot*PRICE).toFixed(0);
-  var ed=new Date(wMon);ed.setDate(wMon.getDate()+6);
-  document.getElementById('maal-daterange').textContent=wMon.getDate()+'. '+MNS_LOW[wMon.getMonth()]+' → '+ed.getDate()+'. '+MNS_LOW[ed.getMonth()];
-  document.getElementById('home-prog').style.width=pct+'%';
-  document.getElementById('home-metrics').innerHTML=
+  var tot=totalWeek(),pct=Math.min(100,Math.round(tot/activeLimit*100));
+  var rem=Math.max(0,activeLimit-tot),kr=(tot*PRICE).toFixed(0);
+  var ex=tot>activeLimit, pc=ex?'var(--red)':'var(--navy)', dc=ex?'#aaa':'#128A00';
+  var html='<div class="maal-top"><div style="flex:1;">'+
+    '<div class="maal-title">'+activeTitle+'</div>'+
+    '<div style="font-size:12px;color:var(--gray);margin-bottom:8px;">Maks '+activeLimit.toLocaleString('da-DK')+' l/uge</div>'+
+    '<div class="prog-wrap"><div class="prog-fill" style="width:'+pct+'%;background:'+pc+'"></div></div>'+
+    '</div>'+dropSVG(dc,activeWeeks,'ds1')+'</div>'+
+    '<div class="metrics-row">'+
     '<div class="metric-cell"><div class="metric-val">'+tot+'</div><div class="metric-lbl">liter brugt</div></div>'+
     '<div class="metric-cell"><div class="metric-val">'+kr+'</div><div class="metric-lbl">kr. brugt</div></div>'+
-    '<div class="metric-cell"><div class="metric-val">'+rem+'</div><div class="metric-lbl">liter tilbage</div></div>';
+    '<div class="metric-cell"><div class="metric-val">'+rem+'</div><div class="metric-lbl">liter tilbage</div></div>'+
+    '</div>';
+  document.getElementById('home-maal-card').innerHTML=html;
 }
 
-// ============================================================
-// KALENDER
-// ============================================================
-var calMonth=today.getMonth(),calYear=today.getFullYear();
-
-function renderCal(){
-  // Tip box
-  var leftToday=Math.max(0,DAILY-todayUsage);
-  var tip=document.getElementById('today-tip-p');
-  if(tip){
-    if(todayUsage<DAILY){
-      tip.innerHTML='Du har stadig <strong>'+leftToday+' l</strong> tilbage ud af dit daglige mål på 250 l — prøv at begrænse forbruget resten af dagen.';
-    }else{
-      tip.innerHTML='Du har brugt <strong>'+todayUsage+' l</strong> i dag ud af dit daglige mål på 250 l — prøv at begrænse forbruget resten af dagen.';
-    }
+function renderHomeBadges(){
+  var sect=document.getElementById('home-badges-sect');
+  var earned=BADGES.filter(function(b){return b.earned;});
+  if(!earned.length){
+    sect.innerHTML='<div class="badge-empty-box"><div class="badge-empty-txt">Tryk på Dropus for at optjene dit første badge</div></div>';
+  } else {
+    var html='<div class="home-badges-row">';
+    earned.forEach(function(b){html+='<div class="badge-home-item" style="background:'+b.bgColor+';" onclick="openBadgeInfo(\''+b.id+'\')">'+badgeSVG(b,88)+'</div>';});
+    html+='</div>';
+    sect.innerHTML=html;
   }
-  document.getElementById('month-label').textContent=MNS_CAP[calMonth]+' '+calYear;
+}
+
+/* ════════════════════════════════════════
+   BADGES
+════════════════════════════════════════ */
+function badgeSVG(b,size){
+  var ic=b.earned?b.color:'#B8C4CC';
+  var bg=b.earned?b.bgColor:'#F2F4F6';
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 118 110" fill="none">'+
+    '<rect x="4" width="110" height="110" rx="12" fill="'+bg+'"/>'+
+    '<path d="M54.46 18.4L44.73 2.19C44.33 1.52 43.77.97 43.09.58 42.41.2 41.65 0 40.87 0H25.23C23.4 0 22.34 2.05 23.38 3.54L39.04 25.92C43.22 22.01 48.54 19.32 54.46 18.4ZM92.77 0H77.13C75.55 0 74.08.83 73.27 2.19L63.54 18.4C69.46 19.32 74.78 22.01 78.96 25.91L94.62 3.54C95.66 2.05 94.6 0 92.77 0ZM59 22.52C45.32 22.52 34.23 33.61 34.23 47.29 34.23 60.97 45.32 72.06 59 72.06 72.68 72.06 83.77 60.97 83.77 47.29 83.77 33.61 72.68 22.52 59 22.52ZM72.02 44.65L66.68 49.85 67.95 57.2C68.17 58.52 66.78 59.53 65.6 58.9L59 55.43 52.4 58.9C51.22 59.53 49.83 58.52 50.06 57.2L51.32 49.85 45.98 44.65C45.02 43.72 45.55 42.09 46.87 41.89L54.25 40.82 57.55 34.13C57.85 33.53 58.42 33.23 59 33.23 59.58 33.23 60.15 33.53 60.45 34.13L63.75 40.82 71.13 41.89C72.45 42.09 72.98 43.72 72.02 44.65Z" fill="'+ic+'"/>'+
+    '<text x="59" y="97" text-anchor="middle" font-family="Helvetica Neue,Arial,sans-serif" font-size="10" font-weight="700" fill="'+ic+'">'+b.name+'</text>'+
+    '</svg>';
+}
+
+function renderBadges(){
+  var html='';
+  BADGES.forEach(function(b){
+    var cls='badge-card '+(b.earned?'':'badge-inactive');
+    var bg=b.earned?b.bgColor:'#F2F4F6';
+    html+='<div class="'+cls+'" style="background:'+bg+';" onclick="openBadgeInfo(\''+b.id+'\')">'+badgeSVG(b,110)+'</div>';
+  });
+  document.getElementById('badges-grid').innerHTML=html;
+}
+
+function openBadgeInfo(id){
+  var b=BADGES.find(function(x){return x.id===id;});
+  if(!b) return;
+  document.getElementById('bps-icon').innerHTML=badgeSVG(b,80);
+  document.getElementById('bps-name').textContent=b.name;
+  var st=document.getElementById('bps-status');
+  st.className='bps-status '+(b.earned?'earned':'locked');
+  st.textContent=b.earned?' Optjent':'Ikke optjent endnu';
+  if(b.earned&&b.earned) st.style.background=b.bgColor, st.style.color=b.color;
+  document.getElementById('bps-how').textContent=b.how;
+  var o=document.getElementById('badge-info-overlay');
+  o.style.display='flex';setTimeout(function(){o.classList.add('open');},10);
+}
+function closeBadgeInfo(){
+  var o=document.getElementById('badge-info-overlay');
+  o.classList.remove('open');setTimeout(function(){o.style.display='none';},350);
+}
+
+var CCOLORS=['#FFD700','#00A8E0','#C9960C','#7B3FC4','#FFB347','#0077CC','#80E0FF','#FF6B6B'];
+function showBadgeUnlock(id){
+  var b=BADGES.find(function(x){return x.id===id;});
+  if(!b) return;
+  document.getElementById('bub-icon').innerHTML=badgeSVG(b,80);
+  document.getElementById('bub-ttl-text').textContent='Du har optjent badget '+b.name;
+  document.getElementById('bub-name').textContent='';
+  document.getElementById('bub-reason').textContent=b.reason;
+  var cf=document.getElementById('bub-confetti'),p='';
+  for(var i=0;i<32;i++){
+    var l=Math.random()*100,del=Math.random()*1.3,dur=2+Math.random()*1.5;
+    var col=CCOLORS[Math.floor(Math.random()*CCOLORS.length)];
+    var w=5+Math.random()*10,h=w*0.38;
+    p+='<div class="confetti-p" style="left:'+l+'%;top:-10px;width:'+w+'px;height:'+h+'px;background:'+col+';animation-delay:'+del+'s;animation-duration:'+dur+'s;transform:rotate('+Math.random()*360+'deg)"></div>';
+  }
+  cf.innerHTML=p;
+  var o=document.getElementById('badge-unlock-overlay');
+  o.style.display='flex';setTimeout(function(){o.classList.add('open');},10);
+}
+function closeBadgeUnlock(){
+  var o=document.getElementById('badge-unlock-overlay');
+  o.classList.remove('open');setTimeout(function(){o.style.display='none';},350);
+  renderHome();
+  if(document.getElementById('badges-screen').classList.contains('active')) renderBadges();
+}
+
+/* ════════════════════════════════════════
+   GOALS
+════════════════════════════════════════ */
+function renderGoals(){
+  /* No active goal state */
+  if(!activeLimit){
+    document.getElementById('active-goals').innerHTML=
+      '<div style="margin:0 16px;background:#fff;border-radius:var(--radius);padding:22px 18px;box-shadow:var(--shadow);text-align:center;">'+
+      '<div style="font-size:15px;font-weight:600;color:var(--navy);margin-bottom:8px;">Du har ingen mål</div>'+
+      '<div style="font-size:13px;color:var(--gray);margin-bottom:18px;line-height:1.55;">Vil du oprette et nyt mål?</div>'+
+      '<button class="btn-primary" style="max-width:200px;margin:0 auto;" onclick="showScreen(\'create-goal-screen\')">Opret et mål</button>'+
+      '</div>';
+    renderPrevGoals();
+    return;
+  }
+  var tot=totalWeek(),pct=Math.min(100,Math.round(tot/activeLimit*100));
+  var rem=Math.max(0,activeLimit-tot),kr=(tot*PRICE).toFixed(0);
+  var ex=tot>activeLimit, pc=ex?'var(--red)':'var(--navy)', dc=ex?'#aaa':'#128A00';
+
+  var titleHtml;
+  if(titleEditOpen){
+    titleHtml='<div class="mk-title-edit-wrap">'+
+      '<input class="mk-title-input" id="mk-title-inp" value="'+activeTitle+'" onkeydown="if(event.key===\'Enter\')saveTitle()">'+
+      '<button class="mk-save-btn" onclick="saveTitle()"><svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M1 6l4 4L15 1" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
+      '</div>';
+  } else {
+    titleHtml='<div class="mk-title-display" onclick="openTitleEdit()">'+activeTitle+'</div>';
+  }
+  var descHtml=activeDesc?'<div class="mk-desc">'+activeDesc+'</div>':'';
+  var descInp='<input class="mk-desc-inp'+(descEditOpen?' open':'')+'" id="mk-desc-inp" placeholder="Tilføj en beskrivelse..." value="'+activeDesc+'" onblur="saveDesc()" onkeydown="if(event.key===\'Enter\')this.blur()">';
+
+  var h='<div class="maal-kort" id="active-goal-card">'+
+    '<div class="mk-hdr"><div class="mk-left">'+
+    titleHtml+
+    '<div class="mk-sub">Maks '+activeLimit.toLocaleString('da-DK')+' l/uge</div>'+
+    descHtml+descInp+
+    '</div><div class="mk-right">'+
+    '<button class="dots-btn" onclick="toggleDots(event)">···</button>'+
+    dropSVG(dc,activeWeeks,'dsG')+
+    '<div class="dots-menu" id="dm-active" style="display:none;">'+
+    '<button class="dots-item" onclick="closeDots();openTitleEdit()">Rediger navn</button>'+
+    '<button class="dots-item" onclick="closeDots();openDescEdit()">Tilføj beskrivelse</button>'+
+    '<button class="dots-item del" onclick="closeDots();askDelete()">Slet mål</button>'+
+    '</div></div></div>'+
+    '<div class="prog-wrap"><div class="prog-fill" style="width:'+pct+'%;background:'+pc+'"></div></div>'+
+    '<div class="maal-metrics">'+
+    '<div class="maal-metric"><div class="mm-val">'+tot+'</div><div class="mm-unit">liter brugt</div></div>'+
+    '<div class="maal-metric"><div class="mm-val">'+kr+'</div><div class="mm-unit">kr. brugt</div></div>'+
+    '<div class="maal-metric"><div class="mm-val">'+rem+'</div><div class="mm-unit">liter tilbage</div></div>'+
+    '</div>'+
+    (ex?'<div style="font-size:11px;color:var(--red);font-weight:600;margin-top:10px;padding-top:10px;border-top:1px solid rgba(204,0,0,.15);">Målet på '+activeLimit.toLocaleString('da-DK')+' l er overskredet.</div>':'')+
+    '</div>';
+  document.getElementById('active-goals').innerHTML=h;
+  if(titleEditOpen) setTimeout(function(){var i=document.getElementById('mk-title-inp');if(i){i.focus();i.select();}},40);
+  renderPrevGoals();
+}
+
+function openTitleEdit(){titleEditOpen=true;renderGoals();}
+function saveTitle(){
+  var i=document.getElementById('mk-title-inp');
+  if(i&&i.value.trim()){activeTitle=i.value.trim();}
+  titleEditOpen=false;renderGoals();renderHome();
+}
+function openDescEdit(){descEditOpen=true;renderGoals();setTimeout(function(){var i=document.getElementById('mk-desc-inp');if(i)i.focus();},40);}
+function saveDesc(){var i=document.getElementById('mk-desc-inp');if(i)activeDesc=i.value;descEditOpen=false;renderGoals();}
+
+function renderPrevGoals(){
+  var list=document.getElementById('prev-list');
+  if(!prevGoals.length){
+    list.innerHTML='<div style="padding:12px 4px 4px;font-size:12px;color:var(--dgray);">Du har ingen tidligere mål</div>';
+    return;
+  }
+  list.innerHTML=prevGoals.map(function(pg,idx){
+    var avgUge=Math.round(pg.avgWeekLiters||1520);
+    return '<div class="prev-card" onclick="openPrevDetail('+idx+')">'+
+      '<div class="prev-card-title">'+pg.title+' — Maks '+pg.limit.toLocaleString('da-DK')+' l/uge</div>'+
+      (pg.desc?'<div class="prev-card-sub">'+pg.desc+'</div>':'')+
+      '<div style="font-size:11px;color:var(--gray);margin-top:4px;">Overholdt i '+pg.weeks+' uger · Gns. '+Math.round(pg.avgWeekLiters||1520).toLocaleString('da-DK')+' l/uge</div>'+
+      '</div>';
+  }).join('');
+}
+
+function openPrevDetail(idx){
+  var pg=prevGoals[idx];
+  if(!pg) return;
+  var avg=Math.round(pg.avgWeekLiters||1520);
+  document.getElementById('prev-detail-content').innerHTML=
+    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--blue);margin-bottom:8px;">Tidligere mål</div>'+
+    '<div style="font-size:22px;font-weight:700;color:var(--navy);margin-bottom:4px;">'+pg.title+'</div>'+
+    '<div style="font-size:13px;color:var(--gray);margin-bottom:16px;">Maks '+pg.limit.toLocaleString('da-DK')+' liter pr. uge</div>'+
+    '<div style="display:flex;gap:10px;margin-bottom:16px;">'+
+    '<div style="flex:1;background:var(--lb);border-radius:14px;padding:14px;text-align:center;">'+
+    '<div style="font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Overholdt</div>'+
+    '<div style="font-size:26px;font-weight:700;color:var(--navy);">'+pg.weeks+'</div>'+
+    '<div style="font-size:11px;color:var(--gray);">uger</div>'+
+    '</div>'+
+    '<div style="flex:1;background:var(--lb);border-radius:14px;padding:14px;text-align:center;">'+
+    '<div style="font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Gns. forbrug</div>'+
+    '<div style="font-size:26px;font-weight:700;color:var(--navy);">'+avg.toLocaleString('da-DK')+'</div>'+
+    '<div style="font-size:11px;color:var(--gray);">l/uge</div>'+
+    '</div></div>'+
+    '<div style="font-size:12px;color:var(--navy);background:var(--lb);border-radius:12px;padding:12px 14px;line-height:1.55;">'+
+    'Du overholdt dette mål i '+pg.weeks+' uger i træk. Dit gennemsnitlige ugeforbrug på '+avg.toLocaleString('da-DK')+' liter var under grænsen på '+pg.limit.toLocaleString('da-DK')+' liter.'+
+    '</div>';
+  var o=document.getElementById('prev-detail-overlay');
+  o.style.display='flex';setTimeout(function(){o.classList.add('open');},10);
+}
+function closePrevDetail(){
+  var o=document.getElementById('prev-detail-overlay');
+  o.classList.remove('open');setTimeout(function(){o.style.display='none';},350);
+}
+
+var prevOpen=false;
+function togglePrev(){
+  prevOpen=!prevOpen;
+  document.getElementById('prev-list').classList.toggle('open',prevOpen);
+  document.getElementById('prev-chev').classList.toggle('open',prevOpen);
+}
+
+function toggleDots(e){
+  e.stopPropagation();
+  var m=document.getElementById('dm-active');
+  if(!m) return;
+  var wasOpen=m.style.display==='block';
+  closeDots();
+  if(!wasOpen) m.style.display='block';
+}
+function closeDots(){document.querySelectorAll('.dots-menu').forEach(function(m){m.style.display='none';});}
+document.addEventListener('click',closeDots);
+
+function askDelete(){document.getElementById('confirm-overlay').classList.add('open');}
+function closeConfirm(){document.getElementById('confirm-overlay').classList.remove('open');}
+function doDelete(){
+  var avgW=0;
+  for(var i=0;i<21;i++){var d=new Date(today);d.setDate(today.getDate()-i);avgW+=dayUsage(d);}
+  prevGoals.push({limit:activeLimit,title:activeTitle,desc:activeDesc,weeks:activeWeeks,avgWeekLiters:Math.round(avgW/3)});
+  activeLimit=0; activeTitle=''; activeDesc=''; activeWeeks=0; goalNum++;
+  closeConfirm();renderGoals();renderHome();
+}
+
+/* ════════════════════════════════════════
+   CREATE GOAL
+════════════════════════════════════════ */
+var createVisited=false, suggestedLimit=0;
+function initCreateGoal(){
+  if(createVisited) return;
+  createVisited=true;
+  var total=0;
+  for(var i=0;i<7;i++){var d=new Date(today);d.setDate(today.getDate()-i);total+=dayUsage(d);}
+  /* suggest limit slightly above actual — already achievable */
+  suggestedLimit=Math.ceil((total+100)/50)*50;
+  showDropus('suggest',
+    'Du havde et forbrug på ca. '+total+' liter den seneste uge. Vil du oprette '+suggestedLimit+' liter som dit nye ugentlige mål — et mål du allerede overholder?',
+    '<button class="dco-yes" onclick="acceptSuggestion()">Ja, opret dette mål</button>'+
+    '<button class="dco-no" onclick="dismissDropus()">Nej tak, lav eget mål</button>'
+  );
+}
+function acceptSuggestion(){
+  dismissDropus();
+  setTimeout(function(){_doActivate(suggestedLimit);},600);
+}
+function activateCustomGoal(){
+  var val=parseInt(document.getElementById('custom-goal-input').value);
+  if(!val||val<100||val>5000){
+    var inp=document.getElementById('custom-goal-input');
+    inp.style.borderColor='var(--red)';inp.focus();
+    setTimeout(function(){inp.style.borderColor='';},2000);
+    return;
+  }
+  _doActivate(val);
+}
+function _doActivate(limit){
+  /* compute avg */
+  var avgW=0;
+  for(var i=0;i<21;i++){var d=new Date(today);d.setDate(today.getDate()-i);avgW+=dayUsage(d);}
+  prevGoals.push({limit:activeLimit,title:activeTitle,desc:activeDesc,weeks:activeWeeks,avgWeekLiters:Math.round(avgW/3)});
+  goalNum++;activeLimit=limit;activeTitle='Mål #'+goalNum;activeDesc='';activeWeeks=0;
+  createVisited=false;
+  showScreen('goals-screen');
+  setTimeout(function(){
+    var c=document.getElementById('active-goal-card');if(c)c.classList.add('new-goal-highlight');
+    showDropus('congrats',
+      'Tillykke med dit nye mål! Mål #'+goalNum+' er nu aktivt under dine målsætninger.',
+      '<button class="dropus-dismiss-btn" onclick="dismissDropus()">Tak, Dropus!</button>'
+    );
+  },500);
+}
+
+/* ════════════════════════════════════════
+   KALENDER — state
+════════════════════════════════════════ */
+var calView='cal';    // 'cal' | 'graf'
+var calPeriod='day';  // 'day' | 'week' | 'month'  (graf only)
+var calMonth=today.getMonth(), calYear=today.getFullYear();
+/* Week navigation offset: 0 = current week, -1 = last week, etc. */
+var weekOffset=0;
+var barDates=[];
+
+/* ── setView: switch between calendar and chart ── */
+function setView(v){
+  calView=v;
+  document.getElementById('vt-cal').classList.toggle('active',v==='cal');
+  document.getElementById('vt-graf').classList.toggle('active',v==='graf');
+  document.getElementById('cal-grid-wrap').classList.toggle('hidden',v==='graf');
+  document.getElementById('chart-area').classList.toggle('vis',v==='graf');
+  document.getElementById('graf-period-row').style.display=v==='graf'?'block':'none';
+  /* cal-picker btn only relevant for cal and month views */
+  document.getElementById('cal-picker-btn').style.visibility=
+    (v==='cal'||(v==='graf'&&calPeriod==='month'))?'visible':'hidden';
+  _updateNavLabel();
+  if(v==='graf') renderBarChart();
+}
+
+/* ── setPeriod: Dag / Uge / Måned in graf ── */
+function setPeriod(p){
+  calPeriod=p;
+  weekOffset=0;
+  ['day','week','month'].forEach(function(x){
+    document.getElementById('pb-'+x).classList.toggle('active',x===p);
+  });
+  /* show picker only for month period */
+  document.getElementById('cal-picker-btn').style.visibility=
+    (p==='month')?'visible':'hidden';
+  _updateNavLabel();
+  renderBarChart();
+}
+
+/* ── Navigation label ── */
+function _updateNavLabel(){
+  if(calView==='cal'){
+    document.getElementById('month-lbl').textContent=MNSCAP[calMonth]+' '+calYear;
+    return;
+  }
+  if(calPeriod==='week'){
+    /* show Mon-Sun of the target week */
+    var wStart=_weekStart(weekOffset);
+    var wEnd=new Date(wStart); wEnd.setDate(wStart.getDate()+6);
+    var lbl=wStart.getDate()+'. '+MNS[wStart.getMonth()];
+    if(wStart.getMonth()!==wEnd.getMonth()) lbl+=' – '+wEnd.getDate()+'. '+MNS[wEnd.getMonth()];
+    else lbl+=' – '+wEnd.getDate()+'. '+MNS[wEnd.getMonth()];
+    document.getElementById('month-lbl').textContent=lbl;
+  } else if(calPeriod==='day'){
+    document.getElementById('month-lbl').textContent=MNSCAP[calMonth]+' '+calYear;
+  } else {
+    document.getElementById('month-lbl').textContent=MNSCAP[calMonth]+' '+calYear;
+  }
+}
+
+/* Returns Monday of week at offset (0=this week, -1=last week …) */
+function _weekStart(offset){
+  var mon=mondayOf(today);
+  var d=new Date(mon); d.setDate(mon.getDate()+offset*7);
+  return d;
+}
+
+/* ── navBack / navForward ── */
+function navBack(){
+  if(calView==='cal'){changeMonth(-1);return;}
+  if(calPeriod==='week'){
+    /* go back one week, min: week containing March 1 2025 */
+    var candidate=weekOffset-1;
+    var wS=_weekStart(candidate);
+    var minDate=new Date(2025,2,1);
+    if(wS<minDate&&wS.getFullYear()<=2025&&wS.getMonth()<2) return;
+    weekOffset=candidate;
+    _updateNavLabel(); renderBarChart(); return;
+  }
+  changeMonth(-1);
+}
+function navForward(){
+  if(calView==='cal'){changeMonth(1);return;}
+  if(calPeriod==='week'){
+    /* can't go forward past current week */
+    if(weekOffset>=0) return;
+    weekOffset++;
+    _updateNavLabel(); renderBarChart(); return;
+  }
+  changeMonth(1);
+}
+
+/* ── renderCal: calendar grid ── */
+function renderCal(){
+  document.getElementById('month-lbl').textContent=MNSCAP[calMonth]+' '+calYear;
   var isNow=(calMonth===today.getMonth()&&calYear===today.getFullYear());
-  document.getElementById('next-month').style.visibility=isNow?'hidden':'visible';
+  document.getElementById('next-nav').style.visibility=isNow?'hidden':'visible';
+  document.getElementById('prev-nav').style.visibility=
+    (calYear===2025&&calMonth===2)?'hidden':'visible';
+
   var first=new Date(calYear,calMonth,1),sd=first.getDay();
   sd=sd===0?6:sd-1;
-  var dim=new Date(calYear,calMonth+1,0).getDate();
-  var html='';
-  for(var i=0;i<sd;i++)html+='<div class="cal-day empty"></div>';
+  var dim=new Date(calYear,calMonth+1,0).getDate(),html='';
+  for(var i=0;i<sd;i++) html+='<div class="cal-day empty"></div>';
   for(var d=1;d<=dim;d++){
     var dt=new Date(calYear,calMonth,d);
-    var isT=dt.toDateString()===today.toDateString();
-    var isFut=dt>today&&!isT;
-    var cls='cal-day'+(isT?' today':'')+(isFut?' future':'');
-    var canClick=(!isFut);
-    html+='<div class="'+cls+'"'+(canClick?' onclick="openDag('+calYear+','+calMonth+','+d+')"':'')+'>'+d+'</div>';
+    var isT=dt.toDateString()===today.toDateString(), isFut=dt>today&&!isT;
+    html+='<div class="cal-day'+(isT?' today':'')+(isFut?' future':'')+'"'+
+      (!isFut?' onclick="openDag('+calYear+','+calMonth+','+d+')"':'')+'>'+d+'</div>';
   }
   document.getElementById('cal-days').innerHTML=html;
-  renderMaanedStats();
+  renderStatCard();
+  renderHusstandCard();
 }
 
 function changeMonth(dir){
   calMonth+=dir;
   if(calMonth<0){calMonth=11;calYear--;}
   if(calMonth>11){calMonth=0;calYear++;}
-  if(calMonth>today.getMonth()&&calYear>=today.getFullYear()){calMonth=today.getMonth();calYear=today.getFullYear();}
+  if(calYear>today.getFullYear()||(calYear===today.getFullYear()&&calMonth>today.getMonth())){
+    calMonth=today.getMonth();calYear=today.getFullYear();
+  }
+  if(calYear<2025||(calYear===2025&&calMonth<2)){calMonth=2;calYear=2025;}
+  _updateNavLabel();
   renderCal();
 }
 
-function renderMaanedStats(){
+/* ── Scroll picker ── */
+var scrollPickerOpen=false;
+function toggleScrollPicker(){
+  scrollPickerOpen=!scrollPickerOpen;
+  document.getElementById('scroll-picker').classList.toggle('open',scrollPickerOpen);
+  if(scrollPickerOpen) buildScrollPicker();
+}
+function buildScrollPicker(){
+  var mc=document.getElementById('sp-month-col');
+  var minY=2025,minM=2;
+  var html='<div style="height:60px;"></div>';
+  var entries=[];
+  var y=today.getFullYear(), m=today.getMonth();
+  while(true){
+    entries.push({y:y,m:m});
+    if(y===minY&&m===minM) break;
+    m--; if(m<0){m=11;y--;}
+    if(y<minY||(y===minY&&m<minM)) break;
+  }
+  entries.forEach(function(e){
+    var isSel=(e.m===calMonth&&e.y===calYear);
+    html+='<div class="scroll-item'+(isSel?' sel':'')+'" onclick="spSelect('+e.m+','+e.y+')">'+MNSCAP[e.m]+' '+e.y+'</div>';
+  });
+  html+='<div style="height:60px;"></div>';
+  mc.innerHTML=html;
+  setTimeout(function(){
+    var sel=mc.querySelector('.sel');
+    if(sel) sel.scrollIntoView({block:'center',behavior:'smooth'});
+  },50);
+}
+function spSelect(m,y){
+  calMonth=m; calYear=y;
+  scrollPickerOpen=false;
+  document.getElementById('scroll-picker').classList.remove('open');
+  _updateNavLabel();
+  if(calView==='cal') renderCal();
+  else renderBarChart();
+}
+function spSelectMonth(m){spSelect(m,calYear);}
+function spSelectYear(y){spSelect(calMonth,y);}
+
+/* ── Stat card ── */
+function renderStatCard(){
   var isNow=(calMonth===today.getMonth()&&calYear===today.getFullYear());
   var maxDay=isNow?today.getDate():new Date(calYear,calMonth+1,0).getDate();
-  var curTotal=0;
-  for(var d=1;d<=maxDay;d++){
-    var dt=new Date(calYear,calMonth,d);
-    if(dt>today)break;
-    curTotal+=dayUsage(dt);
-  }
-  // Same period last year — uses same dayUsage so is internally consistent
-  var lyMaxDay=isNow?today.getDate():new Date(calYear-1,calMonth+1,0).getDate();
-  var lyTotal=0;
-  for(var d=1;d<=lyMaxDay;d++) lyTotal+=dayUsage(new Date(calYear-1,calMonth,d));
-  // Previous month
-  var pm=calMonth===0?11:calMonth-1,py=calMonth===0?calYear-1:calYear;
-  var dip=new Date(py,pm+1,0).getDate(),prevTotal=0;
-  for(var d=1;d<=dip;d++) prevTotal+=dayUsage(new Date(py,pm,d));
-  var lyPrevTotal=0;
-  for(var d=1;d<=dip;d++) lyPrevTotal+=dayUsage(new Date(py-1,pm,d));
-
-  var diff=curTotal-lyTotal,absPct=Math.round(Math.abs(diff)/lyTotal*100);
-  var prevDiff=prevTotal-lyPrevTotal,prevAbsPct=Math.round(Math.abs(prevDiff)/lyPrevTotal*100);
-  var til=isNow?' (indtil videre)':'';
-
-  document.getElementById('cur-month-card').innerHTML=
-    '<div class="mc-lbl">Samlet forbrug i '+MNS_LOW[calMonth]+til+'</div>'+
-    '<div class="mc-big">'+curTotal.toLocaleString('da-DK')+' <span>l</span></div>'+
-    '<div class="mc-sub">Svarer til: '+(curTotal*PRICE).toFixed(0)+' kr.</div>'+
-    '<div class="mc-compare '+(diff<=0?'better':'worse')+'">'+(diff<=0?'↓ '+absPct+'% under':'↑ '+absPct+'% over')+' samme periode i '+(calYear-1)+'</div>';
-
-  document.getElementById('prev-month-card').innerHTML=
-    '<div class="mc-lbl">Samlet forbrug i sidste måned ('+MNS_LOW[pm]+')</div>'+
-    '<div class="mc-big">'+prevTotal.toLocaleString('da-DK')+' <span>l</span></div>'+
-    '<div class="mc-sub">Svarer til: '+(prevTotal*PRICE).toFixed(0)+' kr.</div>'+
-    '<div class="mc-compare '+(prevDiff<=0?'better':'worse')+'">'+(prevDiff<=0?'↓ '+prevAbsPct+'% under':'↑ '+prevAbsPct+'% over')+' '+MNS_LOW[pm]+' '+(py-1)+'</div>';
+  var cur=0;
+  for(var d=1;d<=maxDay;d++){var dt=new Date(calYear,calMonth,d);if(dt>today)break;cur+=dayUsage(dt);}
+  var ly=0,lyMax=isNow?today.getDate():new Date(calYear-1,calMonth+1,0).getDate();
+  for(var d=1;d<=lyMax;d++) ly+=dayUsage(new Date(calYear-1,calMonth,d));
+  var lbl=isNow?'Indtil videre er dit samlede forbrug for '+MNS[calMonth]:'Samlet forbrug for '+MNS[calMonth];
+  var diff=cur-ly, absDiff=Math.abs(diff);
+  document.getElementById('stat-cur').innerHTML=
+    '<div class="stat-lbl">'+lbl+'</div>'+
+    '<div class="stat-big">'+cur.toLocaleString('da-DK')+' <span>liter</span></div>'+
+    '<div class="stat-compare-row">Svarer til '+(cur*PRICE).toFixed(0)+' kr.</div>'+
+    '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--lgray);">'+
+    '<div class="stat-lbl">'+MNSCAP[calMonth]+' '+(calYear-1)+'</div>'+
+    '<div class="stat-big" style="font-size:20px;">'+ly.toLocaleString('da-DK')+' <span>liter</span></div>'+
+    '<div class="stat-compare-row">Dit forbrug er '+absDiff.toLocaleString('da-DK')+' liter '+(diff<=0?'mindre end':'mere end')+' '+MNS[calMonth]+' '+(calYear-1)+'</div>'+
+    '</div>';
 }
 
-// ============================================================
-// DAGSOVERBLIK POPUP — uses same dayUsage(Date) as everywhere
-// ============================================================
+/* ── Husstand card ── */
+var husstandOpen=false;
+function renderHusstandCard(){
+  husstandOpen=false;
+  var body=document.getElementById('husstand-body');
+  var chev=document.getElementById('husstand-chev');
+  body.classList.remove('open');
+  body.style.display='none';
+  chev.classList.remove('open');
+  chev.style.opacity='1';
+  /* Attach click only to the header row to avoid double-firing */
+  var hdr=document.getElementById('husstand-hdr-div');
+  if(hdr) hdr.onclick=toggleHusstand;
+}
+function toggleHusstand(){
+  husstandOpen=!husstandOpen;
+  var body=document.getElementById('husstand-body');
+  var chev=document.getElementById('husstand-chev');
+  body.style.display=husstandOpen?'block':'none';
+  body.classList.toggle('open',husstandOpen);
+  chev.classList.toggle('open',husstandOpen);
+  if(husstandOpen) fillHusstand();
+}
+function fillHusstand(){
+  /* Danish avg 3-person household: ~120 l/person/day = 360 l/day base.
+     Source: Dansk Vand (DANVA) + Danmarks Statistik.
+     Monthly seasonal multipliers (garden watering peaks in summer): */
+  var avgDayPerMonth=[330,326,338,350,370,398,418,408,378,358,336,325];
+  /* jan feb mar apr maj jun jul aug sep okt nov dec */
+  var avgDayBase=avgDayPerMonth[calMonth];
+  var isNow=(calMonth===today.getMonth()&&calYear===today.getFullYear());
+  var daysCount=isNow?today.getDate():new Date(calYear,calMonth+1,0).getDate();
+  var myT=0;
+  for(var d=1;d<=daysCount;d++){
+    var dt=new Date(calYear,calMonth,d); if(dt>today) break;
+    myT+=dayUsage(dt);
+  }
+  var avgT=avgDayBase*daysCount;
+  var diff=myT-avgT;
+  var maxV=Math.max(myT,avgT,1);
+  var myPct=Math.round(myT/maxV*100);
+  var avgPct=Math.round(avgT/maxV*100);
+  var periodLbl=isNow?'indtil videre i '+MNS[calMonth]:'i '+MNS[calMonth];
+  document.getElementById('husstand-body').innerHTML=
+    '<div style="padding:14px 0 4px;">'+
+    '<div style="margin-bottom:16px;">'+
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">'+
+    '<span style="font-size:12px;font-weight:600;color:var(--navy);">Din husstand</span>'+
+    '<span style="font-size:18px;font-weight:700;color:var(--navy);">'+myT.toLocaleString('da-DK')+'<span style="font-size:11px;font-weight:400;color:var(--gray);margin-left:3px;">liter</span></span>'+
+    '</div>'+
+    '<div style="height:10px;background:var(--lgray);border-radius:5px;overflow:hidden;">'+
+    '<div style="width:'+myPct+'%;height:100%;background:var(--navy);border-radius:5px;transition:width .5s;"></div>'+
+    '</div></div>'+
+    '<div style="margin-bottom:14px;">'+
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">'+
+    '<span style="font-size:12px;font-weight:600;color:var(--dgray);">Gennemsnitshusstand (3 pers.)</span>'+
+    '<span style="font-size:18px;font-weight:700;color:var(--dgray);">'+avgT.toLocaleString('da-DK')+'<span style="font-size:11px;font-weight:400;margin-left:3px;">liter</span></span>'+
+    '</div>'+
+    '<div style="height:10px;background:var(--lgray);border-radius:5px;overflow:hidden;">'+
+    '<div style="width:'+avgPct+'%;height:100%;background:var(--dgray);border-radius:5px;transition:width .5s;"></div>'+
+    '</div></div>'+
+    '<div style="font-size:12px;color:var(--gray);padding-top:10px;border-top:1px solid var(--lgray);text-align:center;">'+
+    (diff<=0
+      ? 'Du brugte <strong style="color:var(--navy);">'+Math.abs(diff).toLocaleString('da-DK')+' liter mindre</strong> end gennemsnittet '+periodLbl
+      : 'Du brugte <strong style="color:var(--navy);">'+diff.toLocaleString('da-DK')+' liter mere</strong> end gennemsnittet '+periodLbl)+
+    '</div></div>';
+}/* ── Bar chart ── */
+function renderBarChart(){
+  var canvas=document.getElementById('bar-canvas');
+  if(!canvas) return;
+  var data=[], labels=[], clickDates=[];
+  barDates=[];
+
+  if(calPeriod==='week'){
+    var wStart=_weekStart(weekOffset);
+    var DAY_SHORT=['Søn','Man','Tir','Ons','Tor','Fre','Lør'];
+    for(var i=0;i<7;i++){
+      var dt=new Date(wStart); dt.setDate(wStart.getDate()+i);
+      if(dt>today) break;
+      data.push(dayUsage(dt));
+      labels.push(DAY_SHORT[dt.getDay()]);
+      barDates.push(dt);
+    }
+  } else if(calPeriod==='day'){
+    /* Single bar: today (or latest day in selected month) */
+    var isNow=(calMonth===today.getMonth()&&calYear===today.getFullYear());
+    var targetDay=isNow?today:new Date(calYear,calMonth+1,0);
+    data.push(dayUsage(targetDay));
+    labels.push(targetDay.getDate());
+    barDates.push(targetDay);
+  } else {
+    /* month: all days in selected month up to today */
+    var isNow=(calMonth===today.getMonth()&&calYear===today.getFullYear());
+    var maxDay=isNow?today.getDate():new Date(calYear,calMonth+1,0).getDate();
+    for(var d=1;d<=maxDay;d++){
+      var dt=new Date(calYear,calMonth,d); if(dt>today) break;
+      data.push(dayUsage(dt));
+      labels.push(d);
+      barDates.push(dt);
+    }
+  }
+  if(!data.length) return;
+
+  var W=canvas.parentElement.offsetWidth||361;
+  var H=200;
+  canvas.width=W; canvas.height=H;
+  var ctx=canvas.getContext('2d');
+  var bottomPad=(calPeriod==='week')?34:26;
+  var pad={top:20,right:12,bottom:bottomPad,left:44};
+  var iW=W-pad.left-pad.right, iH=H-pad.top-pad.bottom;
+  var maxV=Math.max.apply(null,data)||400;
+  var yMax=Math.ceil((maxV+40)/100)*100;
+
+  ctx.clearRect(0,0,W,H);
+
+  /* horizontal grid lines + y labels */
+  for(var g=0;g<=4;g++){
+    var yV=yMax*g/4, yPx=pad.top+iH*(1-g/4);
+    ctx.strokeStyle='rgba(13,47,79,.06)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad.left,yPx); ctx.lineTo(pad.left+iW,yPx); ctx.stroke();
+    ctx.fillStyle='rgba(13,47,79,.38)';
+    ctx.font='10px Helvetica Neue,Arial,sans-serif';
+    ctx.textAlign='right';
+    ctx.fillText(Math.round(yV), pad.left-5, yPx+3.5);
+  }
+
+  /* bars */
+  var n=data.length;
+  var maxBarW=calPeriod==='week'?38:20;
+  var barW=Math.max(5, Math.min(maxBarW, (iW/n)*0.72));
+  var gap=(iW-barW*n)/(n+1);
+
+  data.forEach(function(v,i){
+    var x=pad.left+gap+(barW+gap)*i;
+    var bH=Math.max(3, Math.round(iH*v/yMax));
+    var y=pad.top+iH-bH;
+    var grad=ctx.createLinearGradient(x,y,x,y+bH);
+    grad.addColorStop(0,'#00A8E0');
+    grad.addColorStop(1,'rgba(0,90,170,.5)');
+    ctx.fillStyle=grad;
+    ctx.beginPath();
+    var r=Math.min(5,barW/2);
+    if(ctx.roundRect){ctx.roundRect(x,y,barW,bH,r);}else{ctx.rect(x,y,barW,bH);}
+    ctx.fill();
+    /* x label */
+    ctx.fillStyle='rgba(13,47,79,.42)';
+    ctx.font='9px Helvetica Neue,Arial,sans-serif';
+    ctx.textAlign='center';
+    if(calPeriod==='week'){
+      ctx.fillText(labels[i], x+barW/2, H-6);
+    } else {
+      if(labels[i]===1||labels[i]%5===0||i===n-1)
+        ctx.fillText(labels[i], x+barW/2, H-6);
+    }
+  });
+
+  canvas._barGeo={n:n,barW:barW,gap:gap,padLeft:pad.left,iH:iH,padTop:pad.top,iW:iW};
+
+  /* draw inline tooltip if active (month period only) */
+  if(calPeriod==='month' && _activeTipIdx>=0 && _activeTipIdx<data.length){
+    var ti=_activeTipIdx;
+    var tx=pad.left+gap+(barW+gap)*ti;
+    var tbH=Math.max(3,Math.round(iH*data[ti]/yMax));
+    var ty=pad.top+iH-tbH;
+    /* highlight selected bar slightly */
+    ctx.fillStyle='rgba(0,168,224,.18)';
+    ctx.beginPath();
+    var r2=Math.min(5,barW/2);
+    if(ctx.roundRect) ctx.roundRect(tx-2,ty-2,barW+4,tbH+2,r2);
+    else ctx.rect(tx-2,ty-2,barW+4,tbH+2);
+    ctx.fill();
+    _drawTooltip(ctx,tx,ty,barW,data[ti],barDates[ti]?barDates[ti].getDate():'');
+  }
+}
+
+/* Bar click → dagsoverblik (day/week) or inline tooltip (month) */
+function barChartClick(e){
+  if(!document.getElementById('chart-area').classList.contains('vis')) return;
+  var canvas=document.getElementById('bar-canvas');
+  if(!canvas._barGeo) return;
+  var rect=canvas.getBoundingClientRect();
+  var x=(e.clientX-rect.left)*(canvas.width/rect.width);
+  var g=canvas._barGeo;
+  for(var i=0;i<g.n;i++){
+    var bx=g.padLeft+g.gap+(g.barW+g.gap)*i;
+    if(x>=bx-6&&x<=bx+g.barW+6){
+      var dt=barDates[i];
+      if(!dt) return;
+      if(calPeriod==='month'){
+        /* toggle tooltip — tap again to dismiss */
+        if(_activeTipIdx===i){_activeTipIdx=-1;renderBarChart();}
+        else openDayTooltip(dt.getFullYear(),dt.getMonth(),dt.getDate(),dayUsage(dt),i);
+      } else {
+        /* day or week: full unit breakdown sheet */
+        openDag(dt.getFullYear(),dt.getMonth(),dt.getDate());
+      }
+      return;
+    }
+  }
+  /* tap outside any bar: dismiss tooltip */
+  if(calPeriod==='month'&&_activeTipIdx!==-1){_activeTipIdx=-1;renderBarChart();}
+}
+document.getElementById('bar-canvas').addEventListener('click',barChartClick);
+
+/* ════════════════════════════════════════
+   DAGSOVERBLIK — full unit breakdown popup
+   (used from calendar grid, week/day bar chart)
+════════════════════════════════════════ */
 function openDag(year,month,day){
-  var date=new Date(year,month,day);
-  var tot=dayUsage(date); // ← same function as home/calendar
-  var r=seededRand(dayOfYear(date)*13+7+year);
-  var t_p=0.30+r()*.06,b_p=0.28+r()*.06,vh_p=0.14+r()*.04;
-  var op_p=0.10+r()*.04,vk_p=0.08+r()*.04;
+  var date=new Date(year,month,day), tot=dayUsage(date);
+  var r=srand(doy(date)*13+7+year);
+  var t_p=0.30+r()*.06, b_p=0.28+r()*.06, vh_p=0.14+r()*.04;
+  var op_p=0.10+r()*.04, vk_p=0.08+r()*.04;
   var have_p=r()>.6?0.05+r()*.04:0;
   var sum=t_p+b_p+vh_p+op_p+vk_p+have_p;
   t_p/=sum;b_p/=sum;vh_p/=sum;op_p/=sum;vk_p/=sum;have_p/=sum;
-  var toilet=Math.round(tot*t_p),bruser=Math.round(tot*b_p);
-  var vand=Math.round(tot*vh_p),opvask=Math.round(tot*op_p);
-  var vask=Math.round(tot*vk_p),have=Math.round(tot*have_p);
-  // ensure sum = tot
-  var s=toilet+bruser+vand+opvask+vask+have;
-  bruser+=tot-s;
+  var toilet=Math.round(tot*t_p), bruser=Math.round(tot*b_p);
+  var vand=Math.round(tot*vh_p), opvask=Math.round(tot*op_p);
+  var vask=Math.round(tot*vk_p), have=Math.round(tot*have_p);
+  bruser+=tot-(toilet+bruser+vand+opvask+vask+have);
   var devs=[
     {n:'Toilet',l:toilet,i:ICONS.tl},
     {n:'Bruser',l:bruser,i:ICONS.br},
@@ -829,273 +1709,103 @@ function openDag(year,month,day){
     {n:'Opvaskemaskine',l:opvask,i:ICONS.op},
     {n:'Vaskemaskine',l:vask,i:ICONS.vk}
   ];
-  if(have>0)devs.push({n:'Haveslange',l:have,i:ICONS.hv});
-  var html='<div class="dag-date-ttl">'+day+'. <span style="font-size:14px;font-weight:400;color:var(--gray)">'+MNS_CAP[month]+'</span></div>';
+  if(have>0) devs.push({n:'Haveslange',l:have,i:ICONS.hv});
+  devs.sort(function(a,b){return b.l-a.l;});
+  var html='<div class="dag-ttl">'+day+'. '+MNS[month]+'</div>';
   html+='<div class="dag-sub">Forbrug fordelt på enheder</div>';
-  html+='<div class="sep-label">Total forbrug</div>';
-  html+='<div class="enhed-row"><div class="enhed-top"><div class="enhed-left"><div class="enhed-icon">'+ICONS.vm+'</div><div class="enhed-name">Vandmåler</div></div><div class="enhed-liter">'+tot+' <span>l</span></div></div><div class="enhed-bar-wrap"><div class="enhed-bar" style="width:100%"></div></div><div class="enhed-pct">100%</div></div>';
-  html+='<div class="sep-label">Fordeling på enheder</div>';
+  html+='<div class="sep-lbl">Total</div>';
+  html+='<div class="enhed-row">'+
+    '<div class="enhed-top">'+
+    '<div class="enhed-left"><div class="enhed-ico">'+ICONS.vm+'</div><div class="enhed-nm">Vandmåler</div></div>'+
+    '<div class="enhed-lit">'+tot+' <span>liter</span></div>'+
+    '</div>'+
+    '<div class="bar-wrap"><div class="bar-fill" style="width:100%"></div></div>'+
+    '</div>';
+  html+='<div class="sep-lbl">Fordeling</div>';
   devs.forEach(function(dev){
     var pct=Math.round(dev.l/tot*100);
-    html+='<div class="enhed-row"><div class="enhed-top"><div class="enhed-left"><div class="enhed-icon">'+dev.i+'</div><div class="enhed-name">'+dev.n+'</div></div><div class="enhed-liter">'+dev.l+' <span>l</span></div></div><div class="enhed-bar-wrap"><div class="enhed-bar" style="width:'+pct+'%"></div></div><div class="enhed-pct">'+pct+'%</div></div>';
+    html+='<div class="enhed-row">'+
+      '<div class="enhed-top">'+
+      '<div class="enhed-left"><div class="enhed-ico">'+dev.i+'</div><div class="enhed-nm">'+dev.n+'</div></div>'+
+      '<div class="enhed-lit">'+dev.l+' <span>liter</span></div>'+
+      '</div>'+
+      '<div class="bar-wrap"><div class="bar-fill" style="width:'+pct+'%"></div></div>'+
+      '<div class="bar-pct">'+pct+'%</div>'+
+      '</div>';
   });
   document.getElementById('dag-content').innerHTML=html;
   var o=document.getElementById('dag-popup');
   o.style.display='flex';
   setTimeout(function(){o.classList.add('open');},10);
-  // swipe-to-close
-  var sh=document.getElementById('dag-sheet'),sy=0;
-  function ts(e){sy=e.touches[0].clientY;}
-  function te(e){if(e.changedTouches[0].clientY-sy>60)closeDag();}
-  sh.addEventListener('touchstart',ts,{passive:true});
-  sh.addEventListener('touchend',te,{passive:true});
+  /* swipe down or left to close */
+  var sh=document.getElementById('dag-sheet');
+  sh.ontouchstart=function(e){sh._sy=e.touches[0].clientY;sh._sx=e.touches[0].clientX;};
+  sh.ontouchend=function(e){
+    var dy=e.changedTouches[0].clientY-sh._sy;
+    var dx=e.changedTouches[0].clientX-sh._sx;
+    if(dy>65||(dx<-55&&Math.abs(dx)>Math.abs(dy))) closeDag();
+  };
 }
 function closeDag(){
   var o=document.getElementById('dag-popup');
   o.classList.remove('open');
-  setTimeout(function(){o.style.display='none';},350);
+  setTimeout(function(){o.style.display='none';},380);
 }
 
-// ============================================================
-// GOALS
-// ============================================================
-function renderGoals(){
-  var tot=totalWeek();
-  var ed=new Date(wMon);ed.setDate(wMon.getDate()+6);
-  var dr=wMon.getDate()+'. '+MNS_LOW[wMon.getMonth()]+' – '+ed.getDate()+'. '+MNS_LOW[ed.getMonth()];
-  var active=goals.filter(function(g){return g.active;});
-  var inactive=goals.filter(function(g){return !g.active;});
-  document.getElementById('active-goals').innerHTML=active.map(function(g){return goalCard(g,tot,dr);}).join('')||'<p style="font-size:13px;color:var(--gray);padding:8px 16px;">Ingen aktive mål</p>';
-  document.getElementById('inactive-goals').innerHTML=inactive.map(function(g){return goalCard(g,tot,dr);}).join('')||'';
-  document.getElementById('inactive-section').style.display=inactive.length>0?'block':'none';
+/* ── Month bar chart: iOS Health-style inline tooltip ──
+   A small pill floats above the selected bar showing liter value.
+   Drawn directly on the canvas — no overlay, no bottom sheet. */
+var _activeTipIdx=-1;
+
+function openDayTooltip(year,month,day,liters,barIdx){
+  _activeTipIdx=barIdx;
+  renderBarChart(); /* redraws with tooltip */
 }
 
-function goalCard(g,tot,dr){
-  var pct=Math.min(100,Math.round(tot/g.limit*100));
-  var rem=Math.max(0,g.limit-tot),kr=(tot*PRICE).toFixed(0);
-  var exceeded=g.active&&tot>g.limit;
-  var cls=!g.active?'gray-card':exceeded?'red-card':'';
-  var pc=exceeded?'var(--red)':'var(--navy)';
-  var dropC=g.active&&!exceeded?'#128A00':'#aaa';
-  var drop='<svg width="34" height="46" viewBox="0 0 50 66" fill="none">'+
-    '<defs><filter id="dg'+g.id+'"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,.18)"/></filter></defs>'+
-    '<path d="M4.4 38C8.3 21.5 22 17.8 25 0C28.5 17.4 42 21.8 45.6 38C48.2 49 36.4 58 25 58C13.8 58 1.7 49 4.4 38Z" fill="'+dropC+'" filter="url(#dg'+g.id+')"/>'+
-    '<text x="25" y="33" text-anchor="middle" font-family="Helvetica Neue,Arial,sans-serif" font-size="15" font-weight="700" fill="white">'+g.weeks+'</text>'+
-    '<text x="25" y="46" text-anchor="middle" font-family="Helvetica Neue,Arial,sans-serif" font-size="9" fill="white">uger</text>'+
-    '</svg>';
-  var h='<div class="maal-kort '+cls+'" id="kort_'+g.id+'">';
-  h+='<div class="mk-header">';
-  h+='<div class="mk-left"><div class="mk-title">Maks '+g.limit.toLocaleString('da-DK')+' l/uge</div><div class="mk-date">'+dr+'</div></div>';
-  h+='<div class="mk-right">';
-  // Dots only if active (inactive goals only have genaktiver + dots for delete)
-  h+='<button class="btn-dots-goal" onclick="toggleDots(event,\''+g.id+'\')">···</button>';
-  h+=drop;
-  h+='<div class="dots-menu" id="dm_'+g.id+'" style="display:none;">';
-  if(g.active){
-    h+='<button class="dots-item" onclick="closeDots();openMakeInactive(\''+g.id+'\')">Gør inaktivt</button>';
-  }
-  if(g.deletable) h+='<button class="dots-item del" onclick="closeDots();askDelete(\''+g.id+'\')">Slet mål</button>';
-  h+='</div>';
-  h+='</div></div>';
-  h+='<div class="prog-wrap"><div class="prog-fill" style="width:'+pct+'%;background:'+pc+'"></div></div>';
-  h+='<div class="maal-metrics">';
-  h+='<div class="maal-metric"><div class="mm-val">'+tot+'</div><div class="mm-unit">liter brugt</div></div>';
-  h+='<div class="maal-metric"><div class="mm-val">'+kr+'</div><div class="mm-unit">kr. brugt</div></div>';
-  h+='<div class="maal-metric"><div class="mm-val">'+rem+'</div><div class="mm-unit">liter tilbage</div></div>';
-  h+='</div>';
-  if(exceeded) h+='<div class="mk-exceeded">Målet på '+g.limit.toLocaleString('da-DK')+' l er overskredet — din streak er brudt.</div>';
-  if(!g.active) h+='<div style="margin-top:10px;"><button class="btn-genaktiver" onclick="reactGoal(\''+g.id+'\')">Genaktiver mål</button></div>';
-  h+='</div>';
-  return h;
+function _drawTooltip(ctx,x,barTopY,barW,liters,day){
+  var label=liters+' l';
+  ctx.font='bold 11px Helvetica Neue,Arial,sans-serif';
+  var tw=ctx.measureText(label).width;
+  var ph=22, pw=tw+16, pr=7;
+  var px=x+barW/2-pw/2;
+  var py=barTopY-ph-8;
+  /* pill background */
+  ctx.fillStyle='#0D2F4F';
+  ctx.beginPath();
+  if(ctx.roundRect) ctx.roundRect(px,py,pw,ph,pr);
+  else ctx.rect(px,py,pw,ph);
+  ctx.fill();
+  /* tiny triangle pointer */
+  ctx.beginPath();
+  ctx.moveTo(x+barW/2-5,py+ph);
+  ctx.lineTo(x+barW/2+5,py+ph);
+  ctx.lineTo(x+barW/2,py+ph+6);
+  ctx.closePath();
+  ctx.fill();
+  /* text */
+  ctx.fillStyle='#fff';
+  ctx.textAlign='center';
+  ctx.fillText(label,x+barW/2,py+ph/2+4);
 }
 
-function toggleDots(e,id){
-  e.stopPropagation();
-  var m=document.getElementById('dm_'+id);
-  if(!m)return;
-  var open=m.style.display==='block';
-  closeDots();
-  if(!open)m.style.display='block';
-}
-function closeDots(){document.querySelectorAll('.dots-menu').forEach(function(m){m.style.display='none';});}
-document.addEventListener('click',closeDots);
-
-function openMakeInactive(id){
-  epGoalId=id;
-  var o=document.getElementById('ep-overlay');
-  o.style.display='flex';
-  setTimeout(function(){o.classList.add('open');},10);
-}
-function confirmMakeInactive(){
-  var g=goals.find(function(x){return x.id===epGoalId;});
-  if(g){g.active=false;g.weeks=0;}
-  closeEP();renderGoals();
-}
-function closeEP(){
-  var o=document.getElementById('ep-overlay');
-  o.classList.remove('open');
-  setTimeout(function(){o.style.display='none';},350);
-  epGoalId=null;
-}
-function reactGoal(id){var g=goals.find(function(x){return x.id===id;});if(g){g.active=true;g.weeks=0;}renderGoals();}
-function activateGoal(t){
-  var ng=t==='spar20'?{id:'s20_'+Date.now(),limit:1408,active:true,weeks:0,deletable:true}:{id:'r10_'+Date.now(),limit:1575,active:true,weeks:0,deletable:true};
-  goals.push(ng);showScreen('goals-screen');
-}
-function askDelete(id){deleteGoalId=id;document.getElementById('confirm-overlay').classList.add('open');}
-function closeConfirm(){document.getElementById('confirm-overlay').classList.remove('open');deleteGoalId=null;}
-function doDelete(){goals=goals.filter(function(x){return x.id!==deleteGoalId;});closeConfirm();renderGoals();}
-
-// ============================================================
-// LÆR MERE
-// ============================================================
-function renderLearn(){
-  var ids=['vm','tl','br','vh','op','vk','hv'];
-  var html='';
-  ids.forEach(function(id){
-    var done=hasRead(id);
-    var arrow=done
-      ?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#00A8E0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-      :'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="#0D2F4F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    html+='<div class="laer-row" onclick="showEnhed(\''+id+'\')">'+
-      '<div class="laer-row-left"><span style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0">'+ICONS[id]+'</span>'+
-      '<span class="laer-row-name">'+ENHED_NAMES[id]+'</span></div>'+
-      '<span>'+arrow+'</span></div>';
-  });
-  document.getElementById('laer-list').innerHTML=html;
-}
-
-var currentFact={};
-function showEnhed(id){
-  // Mark read (fresh every session start — reset via readUnits=[])
-  var wasRead=hasRead(id);
-  markRead(id);
-  currentFact[id]=0; // always restart facts from beginning
-  document.getElementById('enhed-screen-title').textContent=ENHED_NAMES[id];
-  document.getElementById('enhed-big-icon').innerHTML=
-    '<span style="transform:scale(2.2);transform-origin:center;display:flex;align-items:center;justify-content:center;width:28px;height:28px">'+ICONS[id]+'</span>';
-  document.getElementById('enhed-detail-name').textContent=ENHED_NAMES[id];
-  renderFacts(id);
-  showScreen('enhed-screen');
-  // Check if nysgerrig badge just earned (first time this session hitting 3)
-  if(!nysgerrigShown&&nysgerrigEarned()){
-    nysgerrigShown=true;
-    setTimeout(function(){showBadgeUnlock('nysgerrig');},400);
-  }
-}
-
-function renderFacts(id){
-  var facts=FACTS[id]||[];
-  var cur=currentFact[id]||0;
-  var total=facts.length;
-  var html='';
-  facts.forEach(function(f,i){
-    var dots='';
-    for(var j=0;j<total;j++) dots+='<div class="fact-dot'+(j===i?' active':'')+'"></div>';
-    html+='<div class="fact-card'+(i===cur?'':' hidden')+'">';
-    html+='<div class="fact-label">Vidste du at</div>';
-    html+='<div class="fact-title">'+f.title+'</div>';
-    html+='<div class="fact-text">'+f.text+'</div>';
-    html+='<div class="fact-footer">';
-    if(total>1) html+='<div class="fact-dots">'+dots+'</div>';
-    else html+='<div></div>';
-    if(i<total-1){
-      html+='<button class="btn-next" onclick="nextFact(\''+id+'\','+i+','+total+')">Næste <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg></button>';
-    }else{
-      html+='<button class="btn-next" onclick="showScreen(\'learn-screen\')">Tilbage <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg></button>';
-    }
-    html+='</div></div>';
-  });
-  document.getElementById('facts-container').innerHTML=html;
-}
-
-function nextFact(id,cur,total){
-  if(cur<total-1){currentFact[id]=cur+1;renderFacts(id);}
-}
-
-// ============================================================
-// BADGES
-// ============================================================
-var ALL_BADGES=[
-  {id:'ambitioes',name:'Den ambitiøse',earned:true,how:'Du har startet din vandbesparende rejse i VandApp. Velkommen!'},
-  {id:'vedholdende',name:'Den vedholdende',earned:true,how:'Du har overholdt dit ugentlige vandmål i 3 uger i træk. Fortsæt den gode indsats!'},
-  {id:'super_streak',name:'Den ihærdige',earned:false,how:'Overhold dit ugentlige vandmål i 4 uger i træk for at optjene dette badge.'},
-  {id:'nysgerrig',name:'Den nysgerrige',earned:false,how:'Læs om mindst 3 enheder under "Lær mere om vand" for at optjene dette badge.'},
-  {id:'oekonomisk',name:'Den økonomiske',earned:false,how:'Overhold målsætningen om at spare 20 kr. om ugen på dit vandforbrug i en hel uge.'}
-];
-
-function badgeSVG(name,earned,size){
-  var bg=earned?'#E3F8FF':'#E5E5E5';
-  var ic=earned?'#128A00':'#aaa';
-  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 118 110" fill="none">'+
-    '<rect x="4" width="110" height="110" rx="10" fill="'+bg+'"/>'+
-    '<path d="M54.46 18.4L44.73 2.19C44.33 1.52 43.77.97 43.09.58 42.41.2 41.65 0 40.87 0H25.23C23.4 0 22.34 2.05 23.38 3.54L39.04 25.92C43.22 22.01 48.54 19.32 54.46 18.4ZM92.77 0H77.13C75.55 0 74.08.83 73.27 2.19L63.54 18.4C69.46 19.32 74.78 22.01 78.96 25.91L94.62 3.54C95.66 2.05 94.6 0 92.77 0ZM59 22.52C45.32 22.52 34.23 33.61 34.23 47.29 34.23 60.97 45.32 72.06 59 72.06 72.68 72.06 83.77 60.97 83.77 47.29 83.77 33.61 72.68 22.52 59 22.52ZM72.02 44.65L66.68 49.85 67.95 57.2C68.17 58.52 66.78 59.53 65.6 58.9L59 55.43 52.4 58.9C51.22 59.53 49.83 58.52 50.06 57.2L51.32 49.85 45.98 44.65C45.02 43.72 45.55 42.09 46.87 41.89L54.25 40.82 57.55 34.13C57.85 33.53 58.42 33.23 59 33.23 59.58 33.23 60.15 33.53 60.45 34.13L63.75 40.82 71.13 41.89C72.45 42.09 72.98 43.72 72.02 44.65Z" fill="'+ic+'"/>'+
-    '<text x="59" y="97" text-anchor="middle" font-family="Helvetica Neue,Arial,sans-serif" font-size="10" font-weight="700" fill="'+ic+'">'+name+'</text>'+
-    '</svg>';
-}
-
-function renderBadges(){
-  ALL_BADGES.forEach(function(b){if(b.id==='nysgerrig')b.earned=nysgerrigEarned();});
-  var html='';
-  ALL_BADGES.forEach(function(b){
-    html+='<div class="badge-card '+(b.earned?'active-badge':'inactive-badge')+'" onclick="openBadgePopup(\''+b.id+'\')">'+
-      badgeSVG(b.name,b.earned,110)+
-    '</div>';
-  });
-  document.getElementById('badges-grid').innerHTML=html;
-}
-
-function openBadgePopup(id){
-  ALL_BADGES.forEach(function(b){if(b.id==='nysgerrig')b.earned=nysgerrigEarned();});
-  var b=ALL_BADGES.find(function(x){return x.id===id;});
-  if(!b)return;
-  document.getElementById('bps-icon').innerHTML=badgeSVG(b.name,b.earned,80);
-  document.getElementById('bps-name').textContent=b.name;
-  var st=document.getElementById('bps-status');
-  st.className='bps-status '+(b.earned?'earned':'locked');
-  st.textContent=b.earned?'✓ Optjent':'Ikke optjent endnu';
-  document.getElementById('bps-how').textContent=b.how;
-  var o=document.getElementById('badge-popup');
-  o.style.display='flex';
-  setTimeout(function(){o.classList.add('open');},10);
-}
-
-// ============================================================
-// BADGE UNLOCK CONFETTI POPUP
-// ============================================================
-var CONFETTI_COLORS=['#128A00','#00A8E0','#0D2F4F','#D2F4DE','#E3F8FF','#FFD700','#FF6B6B'];
-function showBadgeUnlock(id){
-  ALL_BADGES.forEach(function(b){if(b.id==='nysgerrig')b.earned=nysgerrigEarned();});
-  var b=ALL_BADGES.find(function(x){return x.id===id;});
-  if(!b)return;
-  document.getElementById('bub-badge-icon').innerHTML=badgeSVG(b.name,true,80);
-  document.getElementById('bub-badge-name').textContent='"'+b.name+'"';
-  // Confetti
-  var cf=document.getElementById('bub-confetti');
-  var pieces='';
-  for(var i=0;i<22;i++){
-    var left=Math.random()*100,delay=Math.random()*1.2,dur=1.5+Math.random()*1.5;
-    var col=CONFETTI_COLORS[Math.floor(Math.random()*CONFETTI_COLORS.length)];
-    pieces+='<div class="confetti-piece" style="left:'+left+'%;background:'+col+';animation-delay:'+delay+'s;animation-duration:'+dur+'s;"></div>';
-  }
-  cf.innerHTML=pieces;
-  var o=document.getElementById('badge-unlock-overlay');
-  o.style.display='flex';
-  setTimeout(function(){o.classList.add('open');},10);
-}
-function closeBadgeUnlock(){
-  var o=document.getElementById('badge-unlock-overlay');
-  o.classList.remove('open');
-  setTimeout(function(){o.style.display='none';},350);
-}
-
-// ============================================================
-// INIT
-// ============================================================
-renderHome();
-renderLearn();
-renderCal();
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+window.addEventListener('load',function(){
+  setGreeting();
+  renderHome();
+  /* init calendar state */
+  _updateNavLabel();
+  setView('cal');
+  renderCal();
+  setTimeout(function(){
+    showDropus('welcome',
+      'Hej! Jeg er Dropus, din digitale vanddråbe. Tryk på mig tre gange for at få dagens vandtip!',
+      '<button class="dropus-dismiss-btn" onclick="dismissDropus()">Hej Dropus!</button>'
+    );
+  },600);
+});
 </script>
-</div><!-- /pw -->
+</div>
 </body>
 </html>
