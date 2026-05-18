@@ -251,7 +251,7 @@ p,span,div,button,input,label{font-family:var(--font);}
 .enhed-lit{font-size:18px;font-weight:700;color:var(--navy);}
 .enhed-lit span{font-size:12px;font-weight:400;color:var(--gray);}
 .bar-wrap{background:var(--lgray);border-radius:6px;height:6px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--blue),var(--navy));}
+.bar-fill{height:100%;border-radius:6px;background:var(--blue);}
 .bar-pct{text-align:right;font-size:10px;color:var(--dgray);margin-top:2px;}
 
 /* ─────── MÅLSÆTNINGER ─────── */
@@ -325,7 +325,7 @@ p,span,div,button,input,label{font-family:var(--font);}
 .badge-unlock-overlay{position:fixed;inset:0;background:rgba(10,24,40,.58);z-index:800;display:none;align-items:center;justify-content:center;padding:28px;backdrop-filter:blur(4px);}
 .badge-unlock-overlay.open{display:flex;}
 .badge-unlock-box{background:#fff;border-radius:28px;padding:32px 24px 28px;width:100%;max-width:310px;text-align:center;position:relative;box-shadow:0 24px 64px rgba(0,0,0,.22);}
-.bub-eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:var(--blue);margin-bottom:10px;}
+.bub-eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:var(--navy);margin-bottom:10px;}
 .bub-ttl{font-size:22px;font-weight:700;color:var(--navy);margin:0 0 10px;line-height:1.25;}
 .bub-sub{display:none;}
 .bub-reason{font-size:13px;color:var(--gray);margin-bottom:24px;line-height:1.6;padding:0 4px;}
@@ -458,8 +458,7 @@ p,span,div,button,input,label{font-family:var(--font);}
   <!-- Graf sub-toggle: Dag / Uge / Måned (only visible in graf view) -->
   <div id="graf-period-row" style="display:none;padding:0 16px 12px;">
    <div style="display:flex;background:var(--lgray);border-radius:12px;padding:3px;">
-    <button class="period-btn active" id="pb-day" onclick="setPeriod('day')">Dag</button>
-    <button class="period-btn" id="pb-week" onclick="setPeriod('week')">Uge</button>
+    <button class="period-btn active" id="pb-week" onclick="setPeriod('week')">Uge</button>
     <button class="period-btn" id="pb-month" onclick="setPeriod('month')">Måned</button>
    </div>
   </div>
@@ -1084,7 +1083,7 @@ function showBadgeUnlock(id){
   var b=BADGES.find(function(x){return x.id===id;});
   if(!b) return;
   document.getElementById('bub-icon').innerHTML=badgeSVG(b,80);
-  document.getElementById('bub-ttl-text').textContent='Du har optjent badget '+b.name;
+  document.getElementById('bub-ttl-text').textContent=b.name;
   document.getElementById('bub-name').textContent='';
   document.getElementById('bub-reason').textContent=b.reason;
   var cf=document.getElementById('bub-confetti'),p='';
@@ -1297,7 +1296,7 @@ function _doActivate(limit){
    KALENDER — state
 ════════════════════════════════════════ */
 var calView='cal';    // 'cal' | 'graf'
-var calPeriod='day';  // 'day' | 'week' | 'month'  (graf only)
+var calPeriod='week'; // 'week' | 'month'  (graf only)
 var calMonth=today.getMonth(), calYear=today.getFullYear();
 /* Week navigation offset: 0 = current week, -1 = last week, etc. */
 var weekOffset=0;
@@ -1322,10 +1321,10 @@ function setView(v){
 function setPeriod(p){
   calPeriod=p;
   weekOffset=0;
-  ['day','week','month'].forEach(function(x){
-    document.getElementById('pb-'+x).classList.toggle('active',x===p);
+  ['week','month'].forEach(function(x){
+    var el=document.getElementById('pb-'+x);
+    if(el) el.classList.toggle('active',x===p);
   });
-  /* show picker only for month period */
   document.getElementById('cal-picker-btn').style.visibility=
     (p==='month')?'visible':'hidden';
   _updateNavLabel();
@@ -1537,7 +1536,7 @@ function fillHusstand(){
     '</div></div>'+
     '<div style="margin-bottom:14px;">'+
     '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">'+
-    '<span style="font-size:12px;font-weight:600;color:var(--dgray);">Gennemsnitshusstand (3 pers.)</span>'+
+    '<span style="font-size:12px;font-weight:600;color:var(--dgray);">Lignende husstand (3 pers.)</span>'+
     '<span style="font-size:18px;font-weight:700;color:var(--dgray);">'+avgT.toLocaleString('da-DK')+'<span style="font-size:11px;font-weight:400;margin-left:3px;">liter</span></span>'+
     '</div>'+
     '<div style="height:10px;background:var(--lgray);border-radius:5px;overflow:hidden;">'+
